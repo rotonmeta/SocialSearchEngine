@@ -1,0 +1,45 @@
+<!DOCTYPE html> {% load staticfiles %}{% load socialaccount %}{% providers_media_js %}
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<form>
+    <a href="/">Torna alla ricerca</a>
+    <button name="delete">cancella cronologia</button>
+</form>
+<h1>CRONOLOGIA</h1>
+<div id="history_box">
+    {% for result in history %}
+        <div id="search">
+
+            {% if result.type == 'query' %}
+                <div id="f">
+                    <a>search:</a>
+                </div>
+                <div id="q" class="query">
+                    <a href="/?q={{ result.title }}&filter={{ result.f }}">{{ result.title }}</a>
+                </div>
+            {% else %}
+                {% if result.f == 'link' or result.f == 'facebook_page' %}
+                    <div id="f">
+                        <a>link</a>
+                    </div>
+                {% else %}
+                    <div id="f">
+                        <a>{{ result.f }}</a>
+                    </div>
+                {% endif %}
+                <div id="q">
+                    <a href="/media?name={{ result.title }}&_type_={{ result.f }}">{{ result.title }}</a>
+                </div>
+            {% endif %}
+
+            <div id="time">
+                <a>{{ result.time }}</a>
+            </div>
+        </div>
+    {% endfor %}
+</div>

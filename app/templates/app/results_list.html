@@ -1,0 +1,178 @@
+<!DOCTYPE html> {% load staticfiles %}{% load socialaccount %}{% providers_media_js %}
+
+<html>
+
+<head>
+    <title>Social Multimedia Search Engine</title>
+    <script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+    <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Cabin' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+          crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+            integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+            crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <script src="{% static 'css/app.js' %}"></script>
+
+    <link rel="shortcut icon" href="#">
+
+
+
+
+    <script>
+        var solr = "{{solr}}";
+        var score_list = [];
+        {% if profpic != 0 %}
+            var user_id = "{{user_id}}";
+
+            score_list = [];
+            {% for document in score_list %}
+                var doc = {
+                    "user_id": "{{document.user_id}}",
+                    "type": "{{document.type}}",
+                    "score": "{{document.score}}",
+                };
+                score_list.push(doc);
+            {% endfor %}
+        {% endif %}
+    </script>
+</head>
+
+<body>
+<nav class="navbar fixed-top navbar-expand-lg  bg-light">
+
+    <div class="login">
+        {% if profpic != 0 %}
+            <div class="nav-user">
+                <div class="profpic nav-profpic" style="margin-left: 5px;"><a
+                        href="#"><img
+                        src="{{ profpic }}"></a>
+                </div>
+            </div>
+        {% else %}
+            <div class="login-facebook">
+                <a title="Facebook" class="socialaccount_provider facebook fb btn" href="{% provider_login_url "facebook" method="js_sdk" %}">
+                <i class="fa fa-facebook fa-fw"></i> Login with Facebook
+                </a>
+            </div>
+        {% endif %}
+    </div>
+    <input class="form-control mr-sm-2" type="text" placeholder="Search" id="query" style="width:65%" autocomplete="off">
+
+    <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle dropdown-filters" type="button" id="dropdownMenuButton"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width:90%">
+            Filter by
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item all_filter" href="#" style="font-weight: bold">All</a>
+            <a class="dropdown-item photo_filter" href="#">Photo</a>
+            <a class="dropdown-item video_filter" href="#">Video</a>
+            <a class="dropdown-item link_filter" href="#">Link</a>
+            <a class="dropdown-item page_filter" href="#">Page</a>
+        </div>
+    </div>
+    {% if profpic != 0 %}
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle dropdown-sliders" type="button" id="dropdownMenuButton"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width:90%"
+                    onmouseover="removezoom();">
+                Similarity
+            </button>
+        </div>
+        <div class="logout" data-toggle="tooltip" title="Logout">
+            <a href={% url 'logout' %}?next=/>
+                <i class="material-icons" style="font-size:45px">exit_to_app</i>
+            </a>
+        </div>
+    {% endif %}
+</nav>
+<nav class="sliders fixed-top navbar-expand-lg  bg-light" style="z-index: 1" onmouseover="removezoom();">
+    <div class="container-sliders">
+        <div class="box-slider">
+            <div class="slidecontainer">
+                <input type="range" min="0" max="100" value="50" class="slider" id="place">
+
+            </div>
+            <div id="place-val"></div>
+            <div>Places</div>
+        </div>
+        <div class="box-slider">
+            <div class="slidecontainer">
+                <input type="range" min="0" max="100" value="50" class="slider" id="age">
+
+            </div>
+            <div id="age-val"></div>
+            <div>Age</div>
+        </div>
+        <div class="box-slider">
+            <div class="slidecontainer">
+                <input type="range" min="0" max="100" value="50" class="slider" id="music">
+
+            </div>
+            <div id="music-val"></div>
+            <div>Music</div>
+        </div>
+
+        <div class="box-slider">
+            <div class="slidecontainer">
+                <input type="range" min="0" max="100" value="50" class="slider" id="book">
+
+            </div>
+            <div id="book-val"></div>
+            <div>Books</div>
+        </div>
+
+        <div class="box-slider">
+            <div class="slidecontainer">
+                <input type="range" min="0" max="100" value="50" class="slider" id="TV">
+
+            </div>
+            <div id="TV-val"></div>
+            <div>TV</div>
+        </div>
+
+        <div class="box-slider">
+            <div class="slidecontainer">
+                <input type="range" min="0" max="100" value="50" class="slider" id="movie">
+
+            </div>
+            <div id="movie-val"></div>
+            <div>Movies</div>
+        </div>
+
+        <div class="box-slider">
+            <div class="slidecontainer">
+                <input type="range" min="0" max="100" value="50" class="slider" id="page">
+
+            </div>
+            <div id="page-val"></div>
+            <div>Pages</div>
+        </div>
+    </div>
+</nav>
+<form onsubmit="return false;">
+
+    <div class="grid" data-masonry='{ "itemSelector": ".grid-item", "columnWidth": 1}'>
+
+    </div>
+
+
+</form>
+<div class="load" style="display:none;">
+    <div>
+        <button type="button" id="add" class="btn btn-primary btn-lg">LOAD MORE</button>
+    </div>
+</div>
+
+
+</body>
+
+</html>
