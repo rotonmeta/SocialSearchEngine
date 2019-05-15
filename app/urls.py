@@ -7,5 +7,5 @@ urlpatterns = [
     path('', views.results_list, name='results_list'),
     path('login/', LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', LogoutView.as_view(), {'next_page': '/'}, name='logout'),
-    path('signup/', views.signup, name='signup'),
+    #path('signup/', views.signup, name='signup'),
 ]

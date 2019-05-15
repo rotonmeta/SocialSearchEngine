@@ -54,21 +54,78 @@ def id_list_page(solr):
     solr.add(pages_list)
 
 
-def web_description(_list, doc, link):
+def web_description(doc):
     try:
-        title, description, image = web_preview(link)
+        title, description, image = web_preview(doc['link'])
         doc.update({'description': description})
         doc.update({'image': image})
     except:
-        doc.update({'description': '__null__'})
+        doc.update({'description': 'None'})
         doc.update({'image': 'None'})
-    _list.append(doc)
-    print(doc)
 
 
-def image_size(_list, doc, link):
+def pageUpdater(_list, page, header):
+    for h in header:
+        page.update(h)
+    page.update({'page_id': page['id']})
+    del page['id']
+    page.update({'image': page['picture']['data']['url']})
+    del page['picture']
+    if 'about' in page.keys():
+        page.update({'description': page['about']})
+        del page['about']
+    elif 'description' in page.keys():
+        pass
+    else:
+        page.update({'description': '__null__'})
+    _list.append(page)
+    print(page)
+
+
+def postUpdater(postsToAdd, post, headerList):
+    for h in headerList:
+        post.update(h)
+
+    if 'message' in post.keys():
+        pass
+    else:
+        post.update({'message': '__null__'})
+
+
+    if post['type'] == 'video':
+
+        if 'source' in post.keys():
+            if 'autoplay=1' in post['source']:
+                post.update({'type': 'video_link'})
+                del post['source']
+
+        if 'full_picture' in post.keys() and 'description' in post.keys():
+            post.update({'image': post['full_picture']})
+        else:
+            web_description(post)
+
+    elif post['type'] == 'photo':
+        if 'full_picture' in post.keys():
+            post.update({'image': post['full_picture']})
+            del post['full_picture']
+            image_size(post)
+        else:
+            pass
+
+    elif post['type'] == 'link':
+
+        if 'full_picture' in post.keys() and 'description' in post.keys():
+            post.update({'image': post['full_picture']})
+        else:
+            web_description(post)
+
+    postsToAdd.append(post)
+    print(post)
+
+
+def image_size(doc):
     try:
-        image_content = requests.get(link).content
+        image_content = requests.get(doc['image']).content
         image_stream = io.BytesIO(image_content)
         img = Image.open(image_stream)
         doc.update({'width': img.width})
@@ -78,430 +135,164 @@ def image_size(_list, doc, link):
         doc.update({'width': 0}) #MODIFICATO da RM: era __null__ invece di 0, per tutte e 3
         doc.update({'height': 0})
         doc.update({'aspect_ratio': 0})
-    _list.append(doc)
 
 
-class FbIndexManager():
-    solr = 'istanza di solr'
+class FbIndexManager:
 
-    def __init__(self, solr):
+    def __init__(self, user, solr):
+        self.user = user
         self.solr = solr
-        #todo:aggiungi graph qui
 
-    def token_is_valid(self, token):
-        url = 'https://graph.facebook.com/me?access_token=' + str(token)
-        r = requests.get(url)
-        if r.status_code == 400:
-            print('token non valido')
-            return 0
-        return 1
-
-    def takeANDindexPosts(self, token):
+    def takeANDindexPosts(self):
         print('starting post index')
-        if self.token_is_valid(token) == 0:
-            return
-        # 1) SCARICO I DATI IN UN FILE JSON
-        graph = facebook.GraphAPI(access_token=token)
+
+        graph = self.user.graph
+        user_id = str(self.user.id)
+        name = str(self.user.name)
+        profPic = str(self.user.profPic)
+
         getter = graph.get_object(id='me',
-                                    fields='name,posts.limit(999999){status_type,story_tags,name,place,'
-                                           'reactions{id},source,message,type,id,link,full_picture,created_time},id')
-        user_id = getter['id']
-        name = getter['name']
+                                    fields='posts.limit(1000){name,description,source,'
+                                           'message,type,id,link,full_picture,created_time}')
 
         if 'posts' not in getter.keys():
             return
-        tmp_json = getter['posts']['data']
+        graphPosts = getter['posts']['data']
 
         while True:
             if 'paging' in getter.keys() and 'next' in getter['paging'].keys():
                 getter = requests.get(getter['paging']['next']).json()
-                tmp_json.extend(getter['data'])
+                graphPosts.extend(getter['data'])
+                print('if')
             elif 'posts' in getter.keys() and 'next' in getter['posts']['paging'].keys():
                 getter = requests.get(getter['posts']['paging']['next']).json()
-                tmp_json.extend(getter['data'])
+                graphPosts.extend(getter['data'])
+                print('else')
             else:
+                print('break')
                 break
 
         # 2) CREO UNA LISTA DI ELEMENTI DA AGGIUNGERE
-        List = []
-        List.append({'doc_type': 'post'})
-        List.append({'user_id': str(user_id)})
-        response = self.solr.search(q='doc_type:post AND user_id:' + str(user_id), rows=100000, wt='python')
-        posts_id_list = []
-        Posts = []
+        headerList = []
+        headerList.append({'doc_type': 'content'})
+        headerList.append({'user_id': user_id})
+        headerList.append({'user_name': name})
+        headerList.append({'user_profile_picture': profPic})
 
-        for tmp in tmp_json:
-            Posts.append(str(tmp['id']))
+        solrPosts = self.solr.search(q='doc_type:content AND -type:page AND user_id:' + user_id, rows=100000, wt='python')
+        solrPostsIdList = []
+        graphPostsIdList = []
+        for post in graphPosts:
+            graphPostsIdList.append(post['id'])
 
-        if response is not []:  # aggiunto da rm
-            for post in response:
-                if str(post['id']) not in Posts:
-                    self.solr.delete(q='doc_type:post AND user_id:' + str(user_id) + ' AND id:' + str(post['id']))
-                posts_id_list.append(post['id'])
+        for solrPost in solrPosts:
+            if solrPost['id'] not in graphPostsIdList:
+                self.solr.delete(q='doc_type:post AND user_id:' + user_id + ' AND id:' + solrPost['id'])
+            else:
+                solrPostsIdList.append(solrPost['id'])
+        self.solr.commit()
 
         # 3) FORMATTO E AGGIUNGO GLI ELEMENTI DELLA LISTA AL FILE JSON
 
-        Posts = []
-        sd = 0
-        for tmp in tmp_json:
-            print(str(sd))
-            if tmp['type'] == 'status':
-                del tmp
-                continue
-            tmp.update({'data': str(tmp['created_time'])})
-            del tmp['created_time']
-
-            if 'place' in tmp.keys():
-                if 'id' in tmp['place']:
-                    place = tmp['place']
-                    tmp.update({'place_id': place['id']})
-                else: #aggiunto da rm
-                    tmp.update({'place_id': '__null__'})
-                del tmp['place']
-
-            if 'reactions' in tmp.keys():
-                tmp.update({'likes_users_id': tmp['reactions']['data']})
-                del tmp['reactions']
-
-            if 'story_tags' in tmp.keys():
-                string = ''
-                for j in range(0, len(tmp['story_tags'])):
-                    if 'type' in tmp['story_tags'][j].keys():   #aggiunto da rm
-                        if tmp['story_tags'][j]['type'] == 'user':
-                            string = string + tmp['story_tags'][j]['id'] + ' '
-                del tmp['story_tags']
-                tmp.update({'tags_users_id': string})
-
-            for j in range(0, len(List)):
-                tmp.update(List[j])
-
-            found = 0
-            for page in posts_id_list:
-                if str(tmp['id']) == str(page):
-                    found = 1
-                    break
-            if found == 0:
-                Posts.append(tmp)
-
-        # 4) INDICIZZO IN SOLR
-        #     E AGGIORNO CONTENUTI
-        self.solr.add(Posts)
-        self.solr.commit()
-        print('post aggiunti')
-
-        self.takeANDindexPlaces(token)
-        response = self.solr.search(q='doc_type:profile_picture AND user_id:' + str(user_id), rows=10, wt='python')
-        profPic = response.docs[0]['link2']
-        link_list = []
-        nome = str(graph.get_object(id='me')['name'])
-
-        doc_list = []
+        postsToAdd = []
         threads = []
-        Contents = []
-        print('inizia aggiunta post come content')
-        for post in Posts:
-            doc = {}
-            doc.update({'doc_type': 'content'})
-            doc.update({'type': post['type']})
-            doc.update({'user_id': user_id})
-            doc.update({'user_name': name})
-            doc.update({'user_profile_picture': profPic})
-            doc.update({'data': post['data']})
-
-            if post['type'] == 'link':
-                if 'status_type' in post.keys():
-                    if 'mobile_status' in post['status_type']:
-                        continue
-            if ('name' in post.keys()) and (post['type'] != 'photo') and (post['name'] not in nome):
-                doc.update({'name': post['name']})
-
-            if 'message' in post.keys():
-                doc.update({'message': post['message']})
-
-            elif post['type'] != 'status':
-                doc.update({'message': '__null__'})
-
-            else:
+        for post in graphPosts:
+            if post['id'] in solrPostsIdList:
                 continue
+            elif (post['type'] == 'status') or ('link' not in post.keys()):
+                del post
+                continue
+            else:
+                thread = threading.Thread(target=postUpdater, args=(postsToAdd, post, headerList))
+                thread.start()
+                threads.append(thread)
+        for t in threads:
+            t.join()
 
-            if 'place_id' in post.keys():
-                response = self.solr.search(q='doc_type:place AND place_id:' + str(post['place_id']), rows=1,
-                                            wt='python')
-                for place in response:
-                    if 'name' in place.keys():
-                        doc.update({'place_name': place['name']})
-                    doc.update({'city': place['city']})
-                    doc.update({'country': place['country']})
-
-            if post['type'] == 'video':
-
-                response = self.solr.search(q='doc_type:content AND link:"' + post['link'] + '"', rows=100000,
-                                            wt='python')
-                if 'source' in post.keys():
-
-                    if 'autoplay=1' in str(post['source']):
-
-                        doc.update({'type': 'video_link'})
-                        doc.update({'link': post['link']})
-                    else:
-                        doc.update({'link': post['source']})
-
-                    if len(response) == 0 and doc['link'] not in link_list:
-                        if 'autoplay=1' in str(post['source']):
-                            thread = threading.Thread(target=web_description, args=(doc_list, doc, post['link']))
-                            thread.start()
-                            threads.append(thread)
-                            #except threading.ThreadError as ex:
-                            #    threads[0].join()
-                            #    print('join after number of threads exceeded. Error: ' + str(ex))
-
-                        else:
-                            doc.update({'image': post['full_picture']})
-                            Contents.append(doc)
-                        link_list.append(doc['link'])
-
-                else:
-                    doc.update({'link': post['link']})
-                    doc.update({'image': post['full_picture']})
-                    if len(response) == 0 and doc['link'] not in link_list:
-                        Contents.append(doc)
-                        link_list.append(doc['link'])
-
-            elif post['type'] == 'photo':
-                doc.update({'image': post['full_picture']})
-                try:
-                    response = self.solr.search(q='doc_type:content AND image:"' + doc['image'] + '"', rows=100000,
-                                                wt='python')
-                except Exception as ex:
-                    print('Errore nella ricerca su solr' + str(ex))
-                    continue
-
-                if len(response) == 0 and doc['image'] not in link_list:
-                    thread = threading.Thread(target=image_size, args=(doc_list, doc, doc['image']))
-                    #try:
-                    thread.start()
-                    threads.append(thread)
-                    #except threading.ThreadError as ex:
-                    #    threads[0].join()
-                    #    print('join after number of threads exceeded. Error: ' + str(ex))
-
-                    link_list.append(doc['image'])
-
-            #elif post['type'] == 'status':
-            #    try:
-            #        response = self.solr.search(q='doc_type:content AND message:"' + doc['message'].replace(':', ';') + '"', rows=100000,
-            #                                wt='python')
-            #    except Exception as ex:
-            #        print('Errore nella ricerca su solr' + str(ex))
-            #        continue
-
-            #    if len(response) == 0 and doc['message'] not in link_list:
-            #        Contents.append(doc)
-            #        link_list.append(doc['message'])
-
-            elif post['type'] == 'link':
-                if 'link' in post.keys(): #aggiunto da rm
-                    doc.update({'link': post['link']})
-                    try:
-                        response = self.solr.search(q='doc_type:content AND link:"' + doc['link'] + '"', rows=100000,
-                                                wt='python')
-                    except:
-                        print('Errore nella ricerca su solr')
-                        continue
-
-                    if len(response) == 0 and doc['link'] not in link_list:
-                        thread = threading.Thread(target=web_description, args=(doc_list, doc, post['link'],))
-                        #try:
-                        thread.start()
-                        threads.append(thread)
-                        #except threading.ThreadError as ex:
-                        #    threads[0].join()
-                        #    print('join after number of threads exceeded. Error: ' + str(ex))
-
-                        link_list.append(doc['link'])
-                else:
-                    doc.update({'link': '__null__'})
-
-            for t in threads:
-                t.join()
-
-        for doc in doc_list:
-            Contents.append(doc)
-
-        self.solr.add(Contents)
+        self.solr.add(postsToAdd)
         self.solr.commit()
-        query = 'doc_type:content AND type:(facebook_page or link) -description:*'
-        self.solr.delete(q=query)
-        self.solr.commit()
+
         print('POST INDICIZZATI')
 
-    def takeANDindexPages(self, token):
-        if self.token_is_valid(token) == 0:
-            return
-
+    def takeANDindexPages(self):
         print('inizia pages')
 
         # 1) SCARICO I DATI IN UN FILE JSON
-        graph = facebook.GraphAPI(access_token=token)
+        graph = self.user.graph
+        user_id = self.user.id
+
         getter = graph.get_object(id='me',
-                                    fields='likes.limit(999999){created_time,description,location,'
-                                           'name,fan_count,category_list,link,genre,id},id')
+                                    fields='likes.limit(99){created_time,location,picture.height(480){url},'
+                                           'name,about,description,fan_count,category_list,link,id}')
         if 'likes' not in getter.keys():
             return
-        tmp_json = getter['likes']['data']
-        user_id = getter['id']
+        graphPages = getter['likes']['data']
 
         while True:
-            if 'paging' in getter.keys() and 'next' in getter['paging'].keys():
-                getter = requests.get(getter['paging']['next']).json()
-                tmp_json.extend(getter['data'])
-            elif 'likes' in getter.keys() and 'next' in getter['likes']['paging'].keys():
-                getter = requests.get(getter['likes']['paging']['next']).json()
-                tmp_json.extend(getter['data'])
-            else:
-                break
-
-        cat_getter = graph.get_object(id='me',
-                                      fields='music.limit(999999),television.limit(999999),movies.limit(999999),books.limit(999999)')
-
-        categories = cat_getter.copy()
-
-        for key in cat_getter.keys():
-            if key == 'id':
-                break
-            tmp_cat_getter = cat_getter.copy()
-            while True:
-                if 'paging' in tmp_cat_getter.keys() and 'next' in tmp_cat_getter['paging'].keys():
-                    tmp_cat_getter = requests.get(tmp_cat_getter['paging']['next']).json()
-                    categories[str(key)]['data'].extend(tmp_cat_getter['data'])
-                elif str(key) in tmp_cat_getter.keys() and 'next' in tmp_cat_getter[str(key)]['paging'].keys():
-                    tmp_cat_getter = requests.get(tmp_cat_getter[str(key)]['paging']['next']).json()
-                    categories[str(key)]['data'].extend(tmp_cat_getter['data'])
+            try:
+                if 'paging' in getter.keys() and 'next' in getter['paging'].keys():
+                    getter = requests.get(getter['paging']['next']).json()
+                    graphPages.extend(getter['data'])
+                elif 'likes' in getter.keys() and 'next' in getter['likes']['paging'].keys():
+                    getter = requests.get(getter['likes']['paging']['next']).json()
+                    graphPages.extend(getter['data'])
                 else:
                     break
-
-        Music_id = []
-        Movies_id = []
-        Books_id = []
-        TV_id = []
-        if 'music' in categories.keys():
-            for i in categories['music']['data']:
-                Music_id.append(str(i['id']))
-        if 'books' in categories.keys():
-            for i in categories['books']['data']:
-                Books_id.append(str(i['id']))
-        if 'television' in categories.keys():
-            for i in categories['television']['data']:
-                TV_id.append(str(i['id']))
-        if 'movies' in categories.keys():
-            for i in categories['movies']['data']:
-                Movies_id.append(str(i['id']))
+            except:
+                pass
 
         # 2) CREO UNA LISTA DI ELEMENTI DA AGGIUNGERE
 
-        List = []
-        List.append({'doc_type': 'page'})
-        List.append({'user_id': user_id})
-        response = self.solr.search(q='doc_type:page AND user_id:' + str(user_id), rows=100000, wt='python')
-        posts_id_list = []
-        Pages = []
-        for tmp in tmp_json:
-            Pages.append(str(tmp['id']))
+        headerList = []
+        headerList.append({'doc_type': 'content'})
+        headerList.append({'type': 'page'})
+        headerList.append({'user_id': user_id})
 
-        for page in response:
-            if str(page['page_id']) not in Pages:
-                self.solr.delete(
-                    q='doc_type:page AND user_id:' + str(user_id) + ' AND page_id:' + str(page['page_id']))
-            posts_id_list.append(page['page_id'])
-
-        # 3) FORMATTO E AGGIUNGO 'DOC_TYPE' E 'USER_ID' AL FILE JSON
-        Pages = []
-        for tmp in tmp_json:
-            category_list = []
-            if str(tmp['id']) in Music_id:
-                tmp.update({'type': 'music'})
-            elif str(tmp['id']) in TV_id:
-                tmp.update({'type': 'television'})
-            elif str(tmp['id']) in Books_id:
-                tmp.update({'type': 'book'})
-            elif str(tmp['id']) in Movies_id:
-                tmp.update({'type': 'movie'})
+        solrPages = self.solr.search(q='doc_type:content AND type:page AND user_id:' + user_id, rows=100000, wt='python')
+        solrPagesIdList = []
+        graphPagesIdList = []
+        for page in graphPages:
+            if page['id'] not in graphPagesIdList:
+                graphPagesIdList.append(page['id'])
             else:
-                tmp.update({'type': 'generic'})
-            tmp.update({'page_id': tmp['id']})
-            del tmp['id']
-            if 'created_time' in tmp.keys():
-                tmp.update({'data': str(tmp['created_time'])})
-                del tmp['created_time']
-            else:
-                tmp.update({'data': '__null__'})
-            if 'category_list' in tmp.keys():
-                for cat in tmp['category_list']:
-                    category_list.append(cat['name'])
-            if 'genre' not in tmp.keys():
-                tmp.update({'genre': '__null__'})
-            if 'location' in tmp.keys():
-                if 'city' in tmp['location'].keys():
-                    tmp.update({'city': tmp['location']['city']})
-                if 'country' in tmp['location'].keys():
-                    tmp.update({'country': tmp['location']['country']})
-                del tmp['location']
-            tmp.update({'category_list': category_list})
-            for j in range(0, len(List)):
-                tmp.update(List[j])
+                del page
 
-            found = 0
-            for page in posts_id_list:
-                if str(tmp['page_id']) == str(page):
-                    found = 1
-                    break
-            if found == 0:
-                Pages.append(tmp)
-        self.solr.add(Pages)
+        for solrPage in solrPages:
+            if solrPage['page_id'] not in graphPagesIdList:
+                self.solr.delete(q='doc_type:page AND user_id:' + user_id + ' AND page_id:' + solrPage['page_id'])
+            else:
+                solrPagesIdList.append(solrPage['page_id'])
         self.solr.commit()
 
-        # 4) INDICIZZO IN SOLR
-        #   E AGGIORNO CONTENUTI
-        doc_list = []
+        # 3) FORMATTO E AGGIUNGO 'DOC_TYPE' E 'USER_ID' AL FILE JSON
+        pagesToAdd = []
         threads = []
-        Contents = []
-
-        for post in Pages: #aggiunto da RM. era Pages
-            doc = {}
-            doc.update({'doc_type': 'content'})
-            doc.update({'type': 'facebook_page'})
-            doc.update({'link': post['link']})
-            doc.update({'name': post['name']})
-            doc.update({'category_list': post['category_list']})
-            doc.update({'genre': post['genre']})
-
-            thread = threading.Thread(target=web_description, args=(doc_list, doc, post['link']))
-            #try:
-            thread.start()
-            threads.append(thread)
-            #except Exception as ex:
-            #    threads[0].join()
-            #    print('join after number of threads exceeded. Error: ' + str(ex))
+        for page in graphPages:
+            if page['id'] in solrPagesIdList:
+                continue
+            else:
+                thread = threading.Thread(target=pageUpdater, args=(pagesToAdd, page, headerList))
+                thread.start()
+                threads.append(thread)
 
         for t in threads:
             t.join()
-        for doc in doc_list:
-            Contents.append(doc)
 
-        self.solr.add(Contents)
+        self.solr.add(pagesToAdd)
         self.solr.commit()
-        id_list_page(self.solr)
+        # 4) INDICIZZO IN SOLR
+        #   E AGGIORNO CONTENUTI
 
         print('PAGINE INDICIZZATE')
 
-    def takeANDindexFriends(self, token):
-        if self.token_is_valid(token) == 0:
-            return
+    def takeANDindexFriends(self):
         print('inizia friends')
 
         # 1) SCARICO I DATI IN UN FILE JSON
-        graph = facebook.GraphAPI(access_token=token)
-        tmp_json = graph.get_object(id='me', fields='friends.limit(99999){id},id')
+        graph = self.user.graph
+        user_id = self.user.id
+
+        tmp_json = graph.get_object(id='me', fields='friends.limit(5000){id},id')
 
         if len(tmp_json['friends']['data']) == 0:
             id_friends = 0
@@ -514,7 +305,7 @@ class FbIndexManager():
         query = 'doc_type:friends_list AND user_id:' + str(tmp_json['id'])
         self.solr.delete(q=query)
         self.solr.add([{'doc_type': 'friends_list',
-                        'user_id': tmp_json['id'],
+                        'user_id': user_id,
                         'friends_id': id_friends,
                         'friends_count': tmp_json['friends']['summary']['total_count'],
                         }])
@@ -522,13 +313,13 @@ class FbIndexManager():
 
         print('LISTA AMICI INDICIZZATA')
 
-    def takeANDindexAge(self, token):
-        if self.token_is_valid(token) == 0:
-            return
+    def takeANDindexAge(self):
         print('inizia age')
 
         # 1) SCARICO I DATI IN UN FILE JSON
-        graph = facebook.GraphAPI(access_token=token)
+        graph = self.user.graph
+        user_id = self.user.id
+
         tmp_json = graph.get_object(id='me', fields='id,birthday')
         if 'birthday' not in tmp_json.keys():
             return
@@ -546,58 +337,39 @@ class FbIndexManager():
         print('add age to solr')
         self.solr.delete(q=query)
         self.solr.add([{'doc_type': 'age',
-                        'user_id': tmp_json['id'],
+                        'user_id': user_id,
                         'age': age,
                         }])
         self.solr.commit()
 
         print('ETA INDICIZZATA')
 
-    def takeANDindexProfPic(self, token):
-        if self.token_is_valid(token) == 0:
-            return
-
+    def takeANDindexProfPic(self):
         # 1) SCARICO I DATI IN UN FILE JSON
-        graph = facebook.GraphAPI(access_token=token)
-        tmp_json = graph.get_object(id='me', fields='albums{name,photos{images}}')
-        if 'albums' not in tmp_json.keys():
-            return
-        user_id = tmp_json['id']
-        tmp_json = tmp_json['albums']['data']
-        for a in tmp_json:
-            if a['name'] == "Profile Pictures":
-                album = a
-                break
 
-        query = 'doc_type:profile_picture AND user_id:' + str(user_id)
-        self.solr.delete(q=query)
-
-        image = album['photos']['data'][0]['images'][0]['source']
-        middle = int(len(album['photos']['data'][0]['images']) - len(album['photos']['data'][0]['images']) / 4.0)
-        image2 = album['photos']['data'][0]['images'][middle]['source']
+        user_id = self.user.id
+        profPic = self.user.profPic
         self.solr.add([{'doc_type': 'profile_picture',
                         'user_id': user_id,
-                        'link': image,
-                        'link2': image2,
+                        'link': profPic,
                         }])
 
         self.solr.commit()
 
         print('PROFPIC INDICIZZATA')
 
-    def takeANDindexPlaces(self, token):
-        if self.token_is_valid(token) == 0:
-            return
+    def takeANDindexPlaces(self):
         print('inizia places')
 
         # 1) SCARICO I DATI IN UN FILE JSON
-        graph = facebook.GraphAPI(access_token=token)
+        graph = self.user.graph
+        user_id = self.user.id
+
         tmp_json = graph.get_object(id='me', fields='posts{place,created_time},tagged_places,id')
 
         # 2) CREO UNA LISTA DI ELEMENTI DA AGGIUNGERE
         List = []
         List.append({'doc_type': 'place'})
-        user_id = tmp_json['id']
         List.append({'user_id': user_id})
         tmp_json2 = []
 

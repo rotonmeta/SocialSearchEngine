@@ -2,18 +2,18 @@ from .FbIndexManager import *
 from .generic_pages_score import *
 from .categorized_pages_score import *
 from .age_score import *
-from .places_score import *
 import time
 import datetime
 
 
-def index_data(token, solr, IndexManager, count):
-    print('indicizzando dati: ', token)
+def index_data(user, solr, IndexManager, count):
+    print('indicizzando dati: ', user.token)
     try:
-        IndexManager.takeANDindexFriends(token)
-        IndexManager.takeANDindexPosts(token)
-        IndexManager.takeANDindexPages(token)
-        IndexManager.takeANDindexAge(token)
+        #IndexManager.takeANDindexFriends()
+        IndexManager.takeANDindexPages()
+        #IndexManager.takeANDindexPlaces()
+        IndexManager.takeANDindexPosts()
+        #IndexManager.takeANDindexAge()
 
         response = solr.search(q='doc_type:friends_list OR doc_type:age', rows=pow(10, 6), wt='python')
         id_list = []
@@ -21,8 +21,8 @@ def index_data(token, solr, IndexManager, count):
             if str(doc['user_id']) not in id_list:
                 id_list.append(str(doc['user_id']))
 
-        update_places_score(solr, id_list)
-        update_age_distance(solr, id_list)
+        #update_places_score(solr, id_list)
+        #update_age_distance(solr, id_list)
         update_generic_pages_score(solr, id_list)
         update_categorized_pages_score(solr, id_list, 'music')
         update_categorized_pages_score(solr, id_list, 'movies')
@@ -34,7 +34,7 @@ def index_data(token, solr, IndexManager, count):
         if count == 0: #era 5, prova 5 volte
             return
         print('riprovo!')
-        index_data(token, solr, IndexManager, count + 1)
+        index_data(user, IndexManager, count)
     print('finito!')
     return
 

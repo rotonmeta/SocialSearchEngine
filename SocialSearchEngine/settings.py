@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -24,7 +25,7 @@ SECRET_KEY = 'ys#(4)#yj=^lk0ai8(jr@+_#a(xr%eabn&+9y#t@=_8w40m5nz'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['socialsearch.blog', 'localhost']  #modificare quando debug = false
+ALLOWED_HOSTS = ['*']  #modificare quando debug = false
 
 #CSRF_COOKIE_SECURE = True
 #SESSION_COOKIE_SECURE = True
@@ -100,7 +101,7 @@ DATABASES = {
         'NAME': 'ebdb',
         'USER':'roton',
         'PASSWORD': '18shtator',
-        'HOST': 'aapez2sbu7yuu.cqnyuin38az6.us-west-2.rds.amazonaws.com',
+        'HOST': 'aa1njbwlpsbdg7p.cqnyuin38az6.us-west-2.rds.amazonaws.com',
         'PORT': '3306',
     }
 }
@@ -108,7 +109,13 @@ DATABASES = {
 SOCIALACCOUNT_PROVIDERS = \
     {'facebook':
          {'METHOD': 'js_sdk',
-          'SCOPE': ['email', 'public_profile', 'user_friends', 'user_photos'],
+          'SCOPE': ['email',
+                    'public_profile',
+                    'user_friends',
+                    'user_birthday',
+                    'user_likes',
+                    'user_posts',
+                    'user_photos'],
           'AUTH_PARAMS': {'auth_type': 'reauthenticate'}, #added by rm
           'FIELDS': [
               'id',
@@ -120,14 +127,12 @@ SOCIALACCOUNT_PROVIDERS = \
               'locale',
               'timezone',
               'link',
-              'gender',
-              'albums',
               'updated_time'],
           'EXCHANGE_TOKEN': True,
           'ACCOUNT_SESSION_REMEMBER': None,
           'LOCALE_FUNC': lambda request: 'en_US',
           'VERIFIED_EMAIL': False,
-          'VERSION': 'v3.2',
+          'VERSION': 'v3.3',
           }
      }
 
@@ -137,7 +142,7 @@ SOCIALACCOUNT_PROVIDERS = \
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 
 
-LOGIN_REDIRECT_URL = 'https://socialsearch.blog/'
+LOGIN_REDIRECT_URL = 'http://localhost:8000/'
 
 AUTH_PASSWORD_VALIDATORS = [
     {

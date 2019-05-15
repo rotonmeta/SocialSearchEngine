@@ -265,9 +265,8 @@ function redirect(e, link) {
 
         success: function (result) {
 
-            //var data = JSON.parse(result); commentato da rm
-
-            //console.log(result);
+            var data = JSON.parse(result);
+            console.log(result);
 
         }
 
@@ -361,7 +360,6 @@ function photo_height(content) {
     $(box).append(inner_box);
     return box;
 }
-
 //     ----------------    VIDEO    ------------------------
 function video_square(content) {
     var box = $('<div class="grid-item"></div>');
@@ -386,7 +384,6 @@ function video_square(content) {
     $(box).append(inner_box);
     return box;
 }
-
 //     ----------------    VIDEO_LINK    ------------------------
 function video_link_width(content) {
     var box = $('<div class="grid-item grid-item--width"></div>');
@@ -395,7 +392,7 @@ function video_link_width(content) {
     var tags = $('<div class="tags"></div>');
     var icon = $('<a href="#" ><div class="icon" id="video" onClick="f(this);" style="background-color:black"><i class="material-icons" style="color:white">videocam</i></div></a>');
     $(tags).append(icon);
-    var text = $('<div class="text"></div>');
+    var text = $('<div class="text"></div>')
     var title = $('<a href="#"  ><div onclick="redirect(this,\'' + content.link + '\')" class="title">' + content.name + '</div></a>').css('padding-top', '4px').css('text-decoration', 'none');
     var description = $('<div class="description">' + content.description + '</div>');
     var user = $('<div class="user"></div>');
@@ -450,7 +447,7 @@ function video_link_square(content) {
     var inner_box = $('<div class="in" onmouseover="imgBig(this)" onclick="redirect(this,\'' + content.link + '\')" style="cursor: pointer"></div>').css('background-image', 'url(' + content.image + ')');
     var tags = $('<div class="tags"></div>');
     var icon = $('<a href="#" ><div class="icon" id="video" onClick="f(this);" style="background-color:white"><i class="material-icons" style="color:black">videocam</i></div></a>');
-    var title = $('<a href="#" ><div class="title title_white" ><span>' + content.name + '</span></div></a>').css('padding-top', '4px').css('text-decoration', 'none').css('text-shadow', ' 0 0 10px rgba(0,0,0,1)');
+    var title = $('<a href="#" ><div class="title title_white" ><span>' + content.name + '</span></div></a>').css('padding-top', '4px').css('text-decoration', 'none').css('text-shadow',' 0 0 10px rgba(0,0,0,1)');
     $(tags).append(icon);
     var user = $('<div class="user"></div>');
     var user_name = $('<div class="profpic"><a  href="' + content.user_profile_picture + '" target="_blank"><img onClick="propagation();" src="' + content.user_profile_picture + '"></img></a></div><a href="' + content.user_profile_picture + '" target="_blank" ><div  onClick="propagation();">' + content.user_name + '</div></a>').css('margin-left', '5px');
@@ -464,7 +461,6 @@ function video_link_square(content) {
     $(box).append(inner_box);
     return box;
 }
-
 //     ----------------    LINK    ------------------------
 function link_width(content) {
     if (content.image != 'None') {
@@ -478,7 +474,7 @@ function link_width(content) {
     var tags = $('<div class="tags"></div>');
     var icon = $('<a href="#" ><div class="icon" id="link" onClick="f(this);" style="background-color:black"><i class="material-icons" style="color:white">insert_link</i></div></a>');
     $(tags).append(icon);
-    var text = $('<div class="text"></div>');
+    var text = $('<div class="text"></div>')
     var title = $('<a href="#" ><div onclick="redirect(this,\'' + content.link + '\')" class="title">' + content.name + '</div></a>').css('padding-top', '4px').css('text-decoration', 'none');
     var description = $('<div class="description">' + content.description + '</div>');
     var user = $('<div class="user"></div>');
@@ -543,7 +539,7 @@ function link_square(content) {
     var inner_box = $('<a class="in" onmouseover="imgBig(this)" href="#" onclick="redirect(this,\'' + content.link + '\')" style="cursor: pointer"> <div ></div></a>').css('background-image', 'url(' + image_str + ')');
     var tags = $('<div class="tags"></div>');
     var icon = $('<a href="#" ><div class="icon" id="link" onClick="f(this);" style="background-color:white"><i class="material-icons" style="color:black">insert_link</i></div></a>');
-    var title = $('<a href="#" ><div class="title title_white" >' + content.name + '</div></a>').css('padding-top', '4px').css('text-decoration', 'none').css('text-shadow', ' 0 0 10px rgba(0,0,0,1)');
+    var title = $('<a href="#" ><div class="title title_white" >' + content.name + '</div></a>').css('padding-top', '4px').css('text-decoration', 'none').css('text-shadow',' 0 0 10px rgba(0,0,0,1)');
     $(tags).append(icon);
     var user = $('<div class="user"></div>');
     var user_name = $('<div class="profpic"><a  href="' + content.user_profile_picture + '" target="_blank"><img onClick="propagation();" src="' + content.user_profile_picture + '"></img></a></div><a href="' + content.user_profile_picture + '" target="_blank" ><div  onClick="propagation();">' + content.user_name + '</div></a>').css('margin-left', '5px');
@@ -557,9 +553,8 @@ function link_square(content) {
     $(box).append(inner_box);
     return box;
 }
-
 //     ----------------    FB_PAGE    ------------------------
-function facebook_page_width(content) {
+function page_width(content) {
     if (content.image != 'None') {
         var image_str = content.image;
     } else {
@@ -575,12 +570,13 @@ function facebook_page_width(content) {
         content.genre != null) {
         var str_tag = content.genre;
     } else {
-        var str_tag = content.category_list[0];
+        var tmp_str_tag = content.category_list[0].split(": ");
+        var str_tag = tmp_str_tag[2].replace(/}/g,"").replace(/'/g,"");
     }
     var tag = $('<a href="#" onClick="propagation();" class="tag">' + str_tag + '</a>').css('margin-left', '4px');
     $(tags).append(icon);
     $(tags).append(tag);
-    var text = $('<div class="text"></div>');
+    var text = $('<div class="text"></div>')
     var title = $('<a href="#" ><div onclick="redirect(this,\'' + content.link + '\')" class="title">' + content.name + '</div></a>').css('padding-top', '4px').css('text-decoration', 'none');
     var description = $('<div class="description">' + content.description + '</div>');
 
@@ -597,7 +593,7 @@ function facebook_page_width(content) {
     return box;
 }
 
-function facebook_page_height(content) {
+function page_height(content) {
     if (content.image != 'None') {
         var image_str = content.image;
     } else {
@@ -612,7 +608,8 @@ function facebook_page_height(content) {
         content.genre != null) {
         var str_tag = content.genre;
     } else {
-        var str_tag = content.category_list[0];
+        var tmp_str_tag = content.category_list[0].split(": ");
+        var str_tag = tmp_str_tag[2].replace(/}/g,"").replace(/'/g,"");
     }
     var tag = $('<a href="#" onClick="propagation();" class="tag">' + str_tag + '</a>').css('margin-left', '4px');
     $(tags).append(icon);
@@ -635,7 +632,7 @@ function facebook_page_height(content) {
     return box;
 }
 
-/*function facebook_page_square(content) {
+function page_square(content) {
     if (content.image != 'None') {
         var image_str = content.image;
     } else {
@@ -645,13 +642,14 @@ function facebook_page_height(content) {
     var inner_box = $('<a class="in" href="#" onclick="redirect(this,\'' + content.link + '\')" onmouseover="imgBig(this)"  style="cursor: pointer"> <div ></div></a>').css('background-image', 'url(' + image_str + ')').css('box-shadow', '0 2px 10px -0.5px #aaaaaa, inset 1000px 4000px 1200px rgba(0,0,0,0.1)');
     var tags = $('<div class="tags"></div>');
     var icon = $('<a href="#"  ><div class="icon" id="page" onClick="f(this);" style="background-color:white"><i class="fa fa-facebook" style="color:black"></i></div></a>');
-    var title = $('<a href="#" ><div onclick="redirect(this,\'' + content.link + '\')" class="title title_white" >' + content.name + '</div></a>').css('padding-top', '4px').css('text-decoration', 'none').css('text-shadow', ' 0 0 10px rgba(0,0,0,1)');
+    var title = $('<a href="#" ><div onclick="redirect(this,\'' + content.link + '\')" class="title title_white" >' + content.name + '</div></a>').css('padding-top', '4px').css('text-decoration', 'none').css('text-shadow',' 0 0 10px rgba(0,0,0,1)');
 
     if (content.genre != '__null__' &&
         content.genre != null) {
         var str_tag = content.genre;
     } else {
-        var str_tag = content.category_list[Math.floor((Math.random() * (content.category_list).length) + 0)];
+        var tmp_str_tag = content.category_list[0].split(": ");
+        var str_tag = tmp_str_tag[2].replace(/}/g,"").replace(/'/g,"");
     }
     var tag = $('<a href="#" onClick="propagation();" class="tag">' + str_tag + '</a>').css('margin-left', '4px');
     $(tags).append(icon);
@@ -663,8 +661,7 @@ function facebook_page_height(content) {
 
     $(box).append(inner_box);
     return box;
-}*/
-
+}
 //     ----------------    POST    ------------------------
 function post_square(content) {
     var box = $('<div class="grid-item"></div>');
@@ -672,7 +669,7 @@ function post_square(content) {
     var inner_box = $('<a href="#" class="in" onmouseover="imgBig(this)" style="cursor: pointer"> <div ></div></a>').css('background-image', 'url(' + url + ')');
     var tags = $('<div class="tags"></div>');
     var icon = $('<a href="#" ><div class="icon" style="background-color:white"><i class="fa fa-pencil-square-o" style="color:black"></i></div></a>');
-    var text = $('<div class="text-status" >' + content.message + '</div>').css('text-decoration', 'none').css('text-shadow', ' 0 0 10px rgba(0,0,0,1)');
+    var text = $('<div class="text-status" >' + content.message + '</div>').css('text-decoration', 'none').css('text-shadow',' 0 0 10px rgba(0,0,0,1)');
     $(tags).append(icon);
     var user = $('<div class="user"></div>');
     var user_name = $('<div class="profpic"><a  href="' + content.user_profile_picture + '" target="_blank"><img onClick="propagation();" src="' + content.user_profile_picture + '"></img></a></div><a href="' + content.user_profile_picture + '" target="_blank" ><div  onClick="propagation();">' + content.user_name + '</div></a>').css('margin-left', '5px');
@@ -706,9 +703,9 @@ function callAjax() {
             var docs = JSON.parse(xmlhttp.response).response.docs;
             render(docs, 0);
         }
-    };
+    }
     var searchStr = document.getElementById("query");
-    var start = num_box * 12;
+    var start = num_box * 12
     if (searchStr.value.length == 0) {
         return;
     } else if (filter == 'all') {
@@ -718,20 +715,20 @@ function callAjax() {
     } else if (filter == 'video') {
         var query_filter = '(type:video OR type:video_link) AND ';
     } else if (filter == 'page') {
-        var query_filter = '(type:facebook_page) AND ';
+        var query_filter = '(type:page) AND ';
     } else if (filter == 'link') {
         var query_filter = '(type:link) AND ';
     } else {
         return;
     }
-    var query = searchStr.value.replace('#', '');
-    if (query.includes(' ') == true) {
-        query = '"' + query + '"';
-    //} else {
-    //    query = "*" + query + "*";
+    var query = searchStr.value;
+    if (query.includes(' ')==true){
+        query='"'+query+'"';
+    }else{
+        query=query;
     }
     console.log(query);
-    global_query = query;
+    global_query=query;
     var score_weight = " ";
     var tmp_user_list = [];
     var tmp_user_score = [];
@@ -756,7 +753,6 @@ function callAjax() {
             }
         }
     }
-
     for (i = 0; i < (tmp_user_score.length); i++) {
         score_weight = score_weight + 'user_id:*' + tmp_user_score[i].user_id + '*^' + (tmp_user_score[i].score + 12) + ' OR ';
     }
@@ -766,13 +762,13 @@ function callAjax() {
         score_weight = " and (user_id:*" + String(user_id) + "*^-10000 OR " + score_weight.substr(0, score_weight.length - 3) + ')^150 ';
     }
     console.log(score_weight);
-    xmlhttp.open("GET", solr + 'select?q=doc_type:content AND -type:status AND '
+    xmlhttp.open("GET", solr
+        + 'select?q=doc_type:content AND '
         + query_filter
         + '(name:' + query + '^10 and place_name:' + query + '^9 and genre:' + query + '^8 and category_list:' + query + '^7 and description:' + query + '^6 and message:' + query + '^5 and city:' + query + '^4 and country:' + query + '^3)^0 '
         + score_weight + ' &start=' + start + '&rows=13', true);
     xmlhttp.send();
 }
-
 function AjaxUpdateScore() {
     var xmlhttp;
     if (window.XMLHttpRequest) {
@@ -785,43 +781,41 @@ function AjaxUpdateScore() {
             var docs = JSON.parse(xmlhttp.response).response.docs;
             updateScore(docs, 0);
         }
-    };
-    xmlhttp.open("GET", solr + 'select?q=doc_type:score -score:0 AND (userA:' + user_id + ' OR userB:' + user_id + ')&rows=130000', true);
+    }
+    xmlhttp.open("GET", solr + 'select?q=doc_type:score -score:0 AND (userA:'+user_id+' OR userB:'+user_id+')& rows=130000', true);
     xmlhttp.send();
 }
-
-function updateScore(arr) {
-    var tmp_score_list = [];
+function updateScore(arr){
+    var tmp_score_list=[];
     for (i = 0; i < arr.length; i++) {
-        var doc = {};
-        if (String(arr[i].userA) == user_id) {
-            var second_user = arr[i].userB;
-        } else {
-            var second_user = arr[i].userA;
+        var doc={};
+        if (String(arr[i].userA)==user_id){
+                var second_user=arr[i].userB;
+        }else{
+                var second_user=arr[i].userA;
         }
-        doc['user_id'] = String(second_user);
-        doc['score'] = arr[i].score;
-        if (String(arr[i].type).includes('places_')) {
-            var type = 'place';
-        } else if (String(arr[i].type).includes('age_')) {
-            var type = 'age';
-        } else if (String(arr[i].type).includes('books_')) {
-            var type = 'book';
-        } else if (String(arr[i].type).includes('music_')) {
-            var type = 'music';
-        } else if (String(arr[i].type).includes('television_')) {
-            var type = 'TV';
-        } else if (String(arr[i].type).includes('movies_')) {
-            var type = 'movie';
-        } else if (String(arr[i].type).includes('generic_')) {
-            var type = 'page';
+        doc['user_id']=String(second_user);
+        doc['score']=arr[i].score;
+        if (String(arr[i].type).includes('places_')){
+                var type='place';
+        }else if (String(arr[i].type).includes('age_')){
+                var type='age';
+        }else if (String(arr[i].type).includes('books_')){
+                var type='book';
+        }else if (String(arr[i].type).includes('music_')){
+                var type='music';
+        }else if (String(arr[i].type).includes('television_')){
+                var type='TV';
+        }else if (String(arr[i].type).includes('movies_')){
+                var type='movie';
+        }else if (String(arr[i].type).includes('generic_')){
+                var type='page';
         }
-        doc['type'] = type;
+        doc['type']=type;
         tmp_score_list.push(doc);
     }
-    score_list = tmp_score_list;
+    score_list=tmp_score_list;
 }
-
 function render(arr, n) {
     removezoom();
     if (num_box == 0) {
@@ -847,6 +841,7 @@ function render(arr, n) {
                 var box = photo_square(arr[i]);
                 count = count + 1;
             }
+
 
 
         } else if (arr[i].type == 'video') {
@@ -878,14 +873,14 @@ function render(arr, n) {
             count = count + 2;
             V.push(i);
 
-        } else if (arr[i].type == 'facebook_page') {
+        } else if (arr[i].type == 'page') {
             for (j = 0; j < Math.floor((Math.random() * 3) + 1); j++) {
                 var num = Math.floor((Math.random() * 2) + 1);
             }
             if (num == 1) {
-                var box = facebook_page_height(arr[i]);
+                var box = page_height(arr[i]);
             } else {
-                var box = facebook_page_width(arr[i]);
+                var box = page_width(arr[i]);
             }
             count = count + 2;
             V.push(i);
@@ -912,21 +907,19 @@ function render(arr, n) {
         var n = 0;
         for (i = 0; i < V.length; i++) {
             var n = n + 1;
-            //if (arr[V[i]].type != 'facebook_page' && arr[V[i]].type != 'link') { //aggiunto da rm
-                var cell = window[arr[V[i]].type + "_square"](arr[V[i]]);
-                $(cell).css({
-                    opacity: 0
-                });
-                $('.grid-item').eq(num_elements + V[i]).replaceWith($(cell));
-                count = count - 1;
-                jQuery('.grid').masonry('reloadItems');
-                jQuery('.grid').masonry('layout');
-                y = $('.grid').height() / 280;
-                y = (y * 4).toFixed();
-                if (y == count) {
-                    break;
-                }
-            //}
+            var cell = window[arr[V[i]].type + "_square"](arr[V[i]]);
+            $(cell).css({
+                opacity: 0
+            });
+            $('.grid-item').eq(num_elements + V[i]).replaceWith($(cell));
+            count = count - 1;
+            jQuery('.grid').masonry('reloadItems');
+            jQuery('.grid').masonry('layout');
+            y = $('.grid').height() / 280;
+            y = (y * 4).toFixed();
+            if (y == count) {
+                break;
+            }
         }
 
     }
