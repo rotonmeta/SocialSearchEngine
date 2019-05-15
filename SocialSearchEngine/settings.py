@@ -95,7 +95,7 @@ WSGI_APPLICATION = 'SocialSearchEngine.wsgi.application'
 
 # Database
 
-DATABASES = {
+DATABASES = { 
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ebdb',
