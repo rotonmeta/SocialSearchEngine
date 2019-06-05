@@ -34,6 +34,10 @@ ALLOWED_HOSTS = ['*']  #modificare quando debug = false
 #SECURE_BROWSER_XSS_FILTER = True
 #SECURE_SSL_REDIRECT = True
 
+# os.environ['HTTPS'] = "on"
+# os.environ['wsgi.url_scheme'] = 'https'
+# ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+
 # Application definition
 
 TEMPLATES = [
@@ -65,6 +69,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.staticfiles',
     'app',
+    'Score_evaluator',
     'django.contrib.auth',
     'django.contrib.messages',
     'django.contrib.sites',
@@ -95,7 +100,7 @@ WSGI_APPLICATION = 'SocialSearchEngine.wsgi.application'
 
 # Database
 
-DATABASES = { 
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ebdb',
@@ -103,6 +108,7 @@ DATABASES = {
         'PASSWORD': '18shtator',
         'HOST': 'aa1njbwlpsbdg7p.cqnyuin38az6.us-west-2.rds.amazonaws.com',
         'PORT': '3306',
+        'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"}
     }
 }
 
@@ -111,11 +117,8 @@ SOCIALACCOUNT_PROVIDERS = \
          {'METHOD': 'js_sdk',
           'SCOPE': ['email',
                     'public_profile',
-                    'user_friends',
-                    'user_birthday',
                     'user_likes',
-                    'user_posts',
-                    'user_photos'],
+                    'user_posts'],
           'AUTH_PARAMS': {'auth_type': 'reauthenticate'}, #added by rm
           'FIELDS': [
               'id',
@@ -136,13 +139,14 @@ SOCIALACCOUNT_PROVIDERS = \
           }
      }
 
-#SECURE_SSL_REDIRECT = True
-#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-#SECURE_REDIRECT_EXEMPT = ['http://solr.socialsearch.blog/solr/demo3/']
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+# SECURE_SSL_REDIRECT = True
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# SECURE_REDIRECT_EXEMPT = ['http://localhost:8000']
+LOGIN_REDIRECT_URL= ('/')
 
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
-LOGIN_REDIRECT_URL = 'http://localhost:8000/'
+#LOGIN_REDIRECT_URL = 'http://localhost:8000/'
 
 AUTH_PASSWORD_VALIDATORS = [
     {

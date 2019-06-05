@@ -46,6 +46,7 @@
 </head>
 
 <body>
+<main>
 <nav class="navbar fixed-top navbar-expand-lg  bg-light">
 
     <div class="login">
@@ -80,13 +81,7 @@
         </div>
     </div>
     {% if profpic != 0 %}
-        <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle dropdown-sliders" type="button" id="dropdownMenuButton"
-                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width:90%"
-                    onmouseover="removezoom();">
-                Similarity
-            </button>
-        </div>
+
         <div class="logout" data-toggle="tooltip" title="Logout">
             <a href={% url 'logout' %}?next=/>
                 <i class="material-icons" style="font-size:45px">exit_to_app</i>
@@ -94,83 +89,26 @@
         </div>
     {% endif %}
 </nav>
-<nav class="sliders fixed-top navbar-expand-lg  bg-light" style="z-index: 1" onmouseover="removezoom();">
-    <div class="container-sliders">
-        <div class="box-slider">
-            <div class="slidecontainer">
-                <input type="range" min="0" max="100" value="50" class="slider" id="place">
 
-            </div>
-            <div id="place-val"></div>
-            <div>Places</div>
-        </div>
-        <div class="box-slider">
-            <div class="slidecontainer">
-                <input type="range" min="0" max="100" value="50" class="slider" id="age">
-
-            </div>
-            <div id="age-val"></div>
-            <div>Age</div>
-        </div>
-        <div class="box-slider">
-            <div class="slidecontainer">
-                <input type="range" min="0" max="100" value="50" class="slider" id="music">
-
-            </div>
-            <div id="music-val"></div>
-            <div>Music</div>
-        </div>
-
-        <div class="box-slider">
-            <div class="slidecontainer">
-                <input type="range" min="0" max="100" value="50" class="slider" id="book">
-
-            </div>
-            <div id="book-val"></div>
-            <div>Books</div>
-        </div>
-
-        <div class="box-slider">
-            <div class="slidecontainer">
-                <input type="range" min="0" max="100" value="50" class="slider" id="TV">
-
-            </div>
-            <div id="TV-val"></div>
-            <div>TV</div>
-        </div>
-
-        <div class="box-slider">
-            <div class="slidecontainer">
-                <input type="range" min="0" max="100" value="50" class="slider" id="movie">
-
-            </div>
-            <div id="movie-val"></div>
-            <div>Movies</div>
-        </div>
-
-        <div class="box-slider">
-            <div class="slidecontainer">
-                <input type="range" min="0" max="100" value="50" class="slider" id="page">
-
-            </div>
-            <div id="page-val"></div>
-            <div>Pages</div>
-        </div>
-    </div>
-</nav>
 <form onsubmit="return false;">
 
     <div class="grid" data-masonry='{ "itemSelector": ".grid-item", "columnWidth": 1}'>
 
     </div>
-
-
 </form>
 <div class="load" style="display:none;">
     <div>
         <button type="button" id="add" class="btn btn-primary btn-lg">LOAD MORE</button>
     </div>
 </div>
+
+</main>
+
+<footer class="footer mt-auto py-3 fixed-bottom">
+  <div class="container text-center">
+    <span class="text-muted text-center">🔎 socialsearch.blog | Made with ❤️ by Roton Meta</span>
+  </div>
+</footer>
 
 
 </body>

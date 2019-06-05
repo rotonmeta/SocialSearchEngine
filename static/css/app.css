@@ -3,6 +3,23 @@
     box-sizing: border-box;
 }
 
+main {
+    padding-bottom: 50px;
+}
+
+footer {
+    position: fixed;
+    background-color: #f8f9fa!important;
+    height: 50px;
+    bottom: 0;
+    width: 100%;
+    box-shadow : 0 2px 10px -0.5px #aaaaaa !important;
+    text-align: center;
+}
+
+.container{
+    text-align: center!important;
+}
 
 body {
     margin: 0;

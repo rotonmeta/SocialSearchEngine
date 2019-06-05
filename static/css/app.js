@@ -43,96 +43,96 @@ $(function () {
         }
 
     });
-    var place_slider = document.getElementById("place");
-    var place_val = $('#place-val').text(place_slider.value);
-    place_slider.oninput = function () {
-        var place_val = $('#place-val').text(place_slider.value);
-        var val = this.value * 100 / this.max;
-        $(place_slider).css('background', 'linear-gradient(to right, #017afd ' + val + '%,#d3d3d3 2%)');
-        if (val == 0) {
-            $(place_slider).addClass('slider2');
-        } else {
-            $(place_slider).removeClass('slider2');
-        }
-    };
-
-    var age_slider = document.getElementById("age");
-    var age_val = $('#age-val').text(age_slider.value);
-    age_slider.oninput = function () {
-        age_val = $('#age-val').text(age_slider.value);
-        var val = this.value * 100 / this.max;
-        $(age_slider).css('background', 'linear-gradient(to right, #017afd ' + val + '%,#d3d3d3 2%)');
-        if (val == 0) {
-            $(age_slider).addClass('slider2');
-        } else {
-            $(age_slider).removeClass('slider2');
-        }
-    };
-
-    var music_slider = document.getElementById("music");
-    var music_val = $('#music-val').text(music_slider.value);
-    music_slider.oninput = function () {
-        var music_val = $('#music-val').text(music_slider.value);
-        var val = this.value * 100 / this.max;
-        $(music_slider).css('background', 'linear-gradient(to right, #017afd ' + val + '%,#d3d3d3 2%)');
-        if (val == 0) {
-            $(music_slider).addClass('slider2');
-        } else {
-            $(music_slider).removeClass('slider2');
-        }
-    };
-
-    var book_slider = document.getElementById("book");
-    var book_val = $('#book-val').text(book_slider.value);
-    book_slider.oninput = function () {
-        var book_val = $('#book-val').text(book_slider.value);
-        var val = this.value * 100 / this.max;
-        $(book_slider).css('background', 'linear-gradient(to right, #017afd ' + val + '%,#d3d3d3 2%)');
-        if (val == 0) {
-            $(book_slider).addClass('slider2');
-        } else {
-            $(book_slider).removeClass('slider2');
-        }
-    };
-
-    var TV_slider = document.getElementById("TV");
-    var TV_val = $('#TV-val').text(TV_slider.value);
-    TV_slider.oninput = function () {
-        var TV_val = $('#TV-val').text(TV_slider.value);
-        var val = this.value * 100 / this.max;
-        $(TV_slider).css('background', 'linear-gradient(to right, #017afd ' + val + '%,#d3d3d3 2%)');
-        if (val == 0) {
-            $(TV_slider).addClass('slider2');
-        } else {
-            $(TV_slider).removeClass('slider2');
-        }
-    };
-
-    var movie_slider = document.getElementById("movie");
-    var movie_val = $('#movie-val').text(movie_slider.value);
-    movie_slider.oninput = function () {
-        var movie_val = $('#movie-val').text(movie_slider.value);
-        var val = this.value * 100 / this.max;
-        $(movie_slider).css('background', 'linear-gradient(to right, #017afd ' + val + '%,#d3d3d3 2%)');
-        if (val == 0) {
-            $(movie_slider).addClass('slider2');
-        } else {
-            $(movie_slider).removeClass('slider2');
-        }
-    };
-
-    var page_slider = document.getElementById("page");
-    var page_val = $('#page-val').text(page_slider.value);
-    page_slider.oninput = function () {
-        var page_val = $('#page-val').text(page_slider.value);
-        var val = this.value * 100 / this.max;
-        $(page_slider).css('background', 'linear-gradient(to right, #017afd ' + val + '%,#d3d3d3 2%)');
-        if (val == 0) {
-            $(page_slider).addClass('slider2');
-        } else {
-            $(page_slider).removeClass('slider2');
-        }
-    };
+    // var place_slider = document.getElementById("place");
+    // var place_val = $('#place-val').text(place_slider.value);
+    // place_slider.oninput = function () {
+    //     var place_val = $('#place-val').text(place_slider.value);
+    //     var val = this.value * 100 / this.max;
+    //     $(place_slider).css('background', 'linear-gradient(to right, #017afd ' + val + '%,#d3d3d3 2%)');
+    //     if (val == 0) {
+    //         $(place_slider).addClass('slider2');
+    //     } else {
+    //         $(place_slider).removeClass('slider2');
+    //     }
+    // };
+    //
+    // var age_slider = document.getElementById("age");
+    // var age_val = $('#age-val').text(age_slider.value);
+    // age_slider.oninput = function () {
+    //     age_val = $('#age-val').text(age_slider.value);
+    //     var val = this.value * 100 / this.max;
+    //     $(age_slider).css('background', 'linear-gradient(to right, #017afd ' + val + '%,#d3d3d3 2%)');
+    //     if (val == 0) {
+    //         $(age_slider).addClass('slider2');
+    //     } else {
+    //         $(age_slider).removeClass('slider2');
+    //     }
+    // };
+    //
+    // var music_slider = document.getElementById("music");
+    // var music_val = $('#music-val').text(music_slider.value);
+    // music_slider.oninput = function () {
+    //     var music_val = $('#music-val').text(music_slider.value);
+    //     var val = this.value * 100 / this.max;
+    //     $(music_slider).css('background', 'linear-gradient(to right, #017afd ' + val + '%,#d3d3d3 2%)');
+    //     if (val == 0) {
+    //         $(music_slider).addClass('slider2');
+    //     } else {
+    //         $(music_slider).removeClass('slider2');
+    //     }
+    // };
+    //
+    // var book_slider = document.getElementById("book");
+    // var book_val = $('#book-val').text(book_slider.value);
+    // book_slider.oninput = function () {
+    //     var book_val = $('#book-val').text(book_slider.value);
+    //     var val = this.value * 100 / this.max;
+    //     $(book_slider).css('background', 'linear-gradient(to right, #017afd ' + val + '%,#d3d3d3 2%)');
+    //     if (val == 0) {
+    //         $(book_slider).addClass('slider2');
+    //     } else {
+    //         $(book_slider).removeClass('slider2');
+    //     }
+    // };
+    //
+    // var TV_slider = document.getElementById("TV");
+    // var TV_val = $('#TV-val').text(TV_slider.value);
+    // TV_slider.oninput = function () {
+    //     var TV_val = $('#TV-val').text(TV_slider.value);
+    //     var val = this.value * 100 / this.max;
+    //     $(TV_slider).css('background', 'linear-gradient(to right, #017afd ' + val + '%,#d3d3d3 2%)');
+    //     if (val == 0) {
+    //         $(TV_slider).addClass('slider2');
+    //     } else {
+    //         $(TV_slider).removeClass('slider2');
+    //     }
+    // };
+    //
+    // var movie_slider = document.getElementById("movie");
+    // var movie_val = $('#movie-val').text(movie_slider.value);
+    // movie_slider.oninput = function () {
+    //     var movie_val = $('#movie-val').text(movie_slider.value);
+    //     var val = this.value * 100 / this.max;
+    //     $(movie_slider).css('background', 'linear-gradient(to right, #017afd ' + val + '%,#d3d3d3 2%)');
+    //     if (val == 0) {
+    //         $(movie_slider).addClass('slider2');
+    //     } else {
+    //         $(movie_slider).removeClass('slider2');
+    //     }
+    // };
+    //
+    // var page_slider = document.getElementById("page");
+    // var page_val = $('#page-val').text(page_slider.value);
+    // page_slider.oninput = function () {
+    //     var page_val = $('#page-val').text(page_slider.value);
+    //     var val = this.value * 100 / this.max;
+    //     $(page_slider).css('background', 'linear-gradient(to right, #017afd ' + val + '%,#d3d3d3 2%)');
+    //     if (val == 0) {
+    //         $(page_slider).addClass('slider2');
+    //     } else {
+    //         $(page_slider).removeClass('slider2');
+    //     }
+    // };
 
 
     $(".all_filter").on("click", function () {
