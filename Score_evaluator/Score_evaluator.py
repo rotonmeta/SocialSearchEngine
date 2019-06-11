@@ -1,11 +1,11 @@
-import json
 import threading
-from .models import Category, CategoryScore
+from .models import Category, CategoryScore, Sum
 from allauth.socialaccount.models import SocialAccount
 from scipy.stats import pearsonr
+import math
 
 
-def user_page_score(solr, user):
+def create_db_rows(solr, user):
     user_id = user.id
     user = SocialAccount.objects.get(uid=user_id)
     user_likes = solr.search(q='type:page AND user_id:' + user_id, fl='page_id, category_list, fan_count', rows=2000, wt='python')
@@ -14,29 +14,79 @@ def user_page_score(solr, user):
     threads = []
     user_category_score = []
     for cat in fb_category_list:
-        thread = threading.Thread(target=_user_page_helper, args=(user_category_score, user_likes, cat, user))
+        thread = threading.Thread(target=_db_helper, args=(user_category_score, user_likes, cat, user))
         thread.start()
         threads.append(thread)
 
     for t in threads:
         t.join()
 
-    CategoryScore.objects.bulk_create(user_category_score)
     Category.objects.bulk_update(fb_category_list, ['likes'])
+    CategoryScore.objects.bulk_create(user_category_score)
     print('fine create')
 
 
-def calculate_similarity(solr, user):
-    user_id = user.id
-    user_scores = CategoryScore.objects.filter(user__uid=user_id).values('score').order_by('category__id')
-    array = [u['score'] for u in user_scores]
+def _db_helper(object_list, user_likes, cat, user):
+    personal_likes = 0
+    real = False
+    for page in user_likes:
+        for category_id in page['category_list']:
+            if cat.id == category_id:
+                personal_likes = personal_likes + 1
+    if personal_likes is not 0:
+        real = True
+    total_likes = cat.likes + personal_likes
+    cat.likes = total_likes
+    to_add = CategoryScore(user=user, category=cat, likes=total_likes, real_value=real)
+    object_list.append(to_add)
 
-    users = solr.search(q='doc_type:user AND -user_id:' + user_id, rows=200, wt='python')
+
+def remove_sparsity(user):
+    categories = Category.objects.all()
+    category_scores = CategoryScore.objects.filter(user__uid=user.id)
+
+    recursive_sparsity(category_scores)
+
+    Category.objects.bulk_update(categories, ['likes'])
+    CategoryScore.objects.bulk_update(category_scores, ['likes'])
+
+
+def recursive_sparsity(category_scores):
+    for parent in category_scores:
+        #if parent.real_value is True:
+        _id = parent.category.id
+        _likes = parent.likes
+        children = Category.objects.filter(parent__id=_id)
+        if len(children) is 0:
+            continue
+        new_likes = math.ceil(_likes / len(children))
+        #print('1')
+        for child in children:
+            #print('2')
+            elem = category_scores.get(category=child)
+            #print('3')
+            if elem.real_value is False:
+                #print('4')
+                elem.likes = new_likes
+                child.likes = new_likes
+                #print('5')
+                _children = Category.objects.filter(parent__id=child.id)
+                child_category_scores = category_scores.filter(category__in=_children)
+                #print('6')
+                if not child_category_scores:
+                    continue
+                else:
+                    recursive_sparsity(child_category_scores)
+
+
+def calculate_similarity(solr, user):
+    user1_id = user.id
+    users = solr.search(q='doc_type:user AND -user_id:' + user1_id, rows=200, wt='python')
 
     threads = []
-    for user in users:
-        print(str(user))
-        thread = threading.Thread(target=_similarity_helper, args=(array, user))
+    for user2 in users:
+        print('Calculating similarity for ' + user2['user_name'])
+        thread = threading.Thread(target=_similarity_helper, args=(user1_id, user2['user_id']))
         thread.start()
         threads.append(thread)
 
@@ -44,34 +94,38 @@ def calculate_similarity(solr, user):
         t.join()
 
 
-def _user_page_helper(object_list, user_likes, cat, user):
-    cat_count = 0
-    cat_likes = cat.likes
-    for page in user_likes:
-        for category_id in page['category_list']:
-            if cat.id == category_id:
-                cat_count = cat_count + 1
-                cat_likes = cat_likes + page['fan_count']
-    adjusted_count = cat_count/len(user_likes)
-    #category = Category(id=cat['id'])
-    cat.likes = cat_likes
-    to_add = CategoryScore(user=user, category=cat, score=adjusted_count)
-    object_list.append(to_add)
-    #print(str(cat['name']))
+def _similarity_helper(user1_id, user2_id):
+    user1_vector = get_vector(user1_id)
+    user2_vector = get_vector(user2_id)
 
-
-def _similarity_helper(array1, user2):
-    user2_scores = CategoryScore.objects.filter(user__uid=user2['user_id']).values('score').order_by(
-        'category__id')
-    array2 = [u['score'] for u in user2_scores]
-    result = pearsonr(array1, array2)
+    result = pearsonr(user1_vector, user2_vector)
     print('Pearson similarity ' + str(result))
 
 
-def sparsity_remover():
-    pass
+def get_vector(user_id):
+    user_likes = CategoryScore.objects.filter(user__uid=user_id).values('likes').order_by('category__id')
+    n_likes = CategoryScore.objects.filter(user__uid=user_id).aggregate(Sum('likes')).get('likes__sum')
+    tf = [u['likes'] / n_likes for u in user_likes]
+    print('tf ' + str(tf))
 
+    cat_likes = Category.objects.all().values('likes').order_by('id')
+    total_likes = Category.objects.all().aggregate(Sum('likes')).get('likes__sum')
 
+    idf = [math.log(total_likes / c['likes']) if c['likes'] else 0 for c in cat_likes]
+    print('idf ' + str(idf))
+
+    tf_idf = [a*b for a, b in zip(tf, idf)]
+    print(tf_idf)
+
+    ma = max(tf_idf)
+    print('max ' + str(ma))
+    mi = min(tf_idf)
+    print('min ' + str(mi))
+
+    normalized_vector = [(x - mi) / (ma - mi) for x in tf_idf]
+    print(normalized_vector)
+
+    return normalized_vector
 
 
 
