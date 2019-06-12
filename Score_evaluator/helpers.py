@@ -9,23 +9,23 @@ def get_start_json():
     return _json_file['data']
 
 
-def recursive_parent(json, parent_id, list):
-    for elem in json:
+def recursive_parent(_json, parent_id, _list, depth):
+    for elem in _json:
         if parent_id is not None:
-            list.append(Category(id=elem['id'], name=elem['name'], parent=Category(id=parent_id)))
+            _list.append(Category(id=elem['id'], name=elem['name'], parent=Category(id=parent_id), depth=depth))
         else:
-            list.append(Category(id=elem['id'], name=elem['name'], parent=None))
+            _list.append(Category(id=elem['id'], name=elem['name'], parent=None, depth=depth))
 
         print('added ' + elem['name'])
 
         if 'fb_page_categories' in elem.keys():
-            recursive_parent(elem['fb_page_categories'], elem['id'], list)
+            recursive_parent(elem['fb_page_categories'], elem['id'], _list, depth+1)
 
 
 def populate_db():
-    json = get_start_json()
+    _json = get_start_json()
     categories = []
-    recursive_parent(json, None, categories)
+    recursive_parent(_json=_json, parent_id=None, _list=categories, depth=1)
 
     Category.objects.bulk_create(categories)
 

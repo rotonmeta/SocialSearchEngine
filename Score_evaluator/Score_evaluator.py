@@ -42,13 +42,20 @@ def _db_helper(object_list, user_likes, cat, user):
 
 
 def remove_sparsity(user):
-    categories = Category.objects.all()
-    category_scores = CategoryScore.objects.filter(user__uid=user.id)
+    #categories = Category.objects.all
+    cat_scores = CategoryScore.objects.select_related('category__parent__parent').filter(user__uid=user.id).values('category_id', 'likes', 'category__parent_id').order_by()
+    cat_scores_gt_0 = cat_scores.filter(likes__gt=0)
+    #for elem in cat_scores_gt_0:
 
-    recursive_sparsity(category_scores)
+    # recursive_sparsity(category_scores)
+    #
+    # Category.objects.bulk_update(categories, ['likes'])
+    # CategoryScore.objects.bulk_update(category_scores, ['likes'])
 
-    Category.objects.bulk_update(categories, ['likes'])
-    CategoryScore.objects.bulk_update(category_scores, ['likes'])
+
+# def recursive_sparsity_v2(category_scores):
+#     for elem in category_scores:
+#         if elem.likes is not 0:
 
 
 def recursive_sparsity(category_scores):
@@ -57,22 +64,22 @@ def recursive_sparsity(category_scores):
         _id = parent.category.id
         _likes = parent.likes
         children = Category.objects.filter(parent__id=_id)
+        print(str(children))
         if len(children) is 0:
             continue
         new_likes = math.ceil(_likes / len(children))
-        #print('1')
+        print('new Likes :' + str(new_likes))
         for child in children:
-            #print('2')
+            print(str(child))
             elem = category_scores.get(category=child)
-            #print('3')
+            print('elem: ' + str(elem))
             if elem.real_value is False:
-                #print('4')
                 elem.likes = new_likes
                 child.likes = new_likes
-                #print('5')
                 _children = Category.objects.filter(parent__id=child.id)
+                print(str(_children))
                 child_category_scores = category_scores.filter(category__in=_children)
-                #print('6')
+                print(str(child_category_scores))
                 if not child_category_scores:
                     continue
                 else:
@@ -95,14 +102,31 @@ def calculate_similarity(solr, user):
 
 
 def _similarity_helper(user1_id, user2_id):
-    user1_vector = get_vector(user1_id)
-    user2_vector = get_vector(user2_id)
+    user1_vector = get_vector_tf(user1_id)
+    user2_vector = get_vector_tf(user2_id)
 
     result = pearsonr(user1_vector, user2_vector)
     print('Pearson similarity ' + str(result))
 
 
-def get_vector(user_id):
+def get_vector_tf(user_id):
+    user_likes = CategoryScore.objects.filter(user__uid=user_id).values('likes').order_by('category__id')
+    n_likes = CategoryScore.objects.filter(user__uid=user_id).aggregate(Sum('likes')).get('likes__sum')
+    tf = [u['likes'] / n_likes for u in user_likes]
+    print('tf ' + str(tf))
+
+    ma = max(tf)
+    print('max ' + str(ma))
+    mi = min(tf)
+    print('min ' + str(mi))
+
+    normalized_vector = [(x - mi) / (ma - mi) for x in tf]
+    print(normalized_vector)
+
+    return normalized_vector
+
+
+def get_vector_tf_idf(user_id):
     user_likes = CategoryScore.objects.filter(user__uid=user_id).values('likes').order_by('category__id')
     n_likes = CategoryScore.objects.filter(user__uid=user_id).aggregate(Sum('likes')).get('likes__sum')
     tf = [u['likes'] / n_likes for u in user_likes]

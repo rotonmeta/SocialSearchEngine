@@ -251,7 +251,6 @@ class FbIndexManager:
             else:
                 del page
 
-
         for solrPage in solrPages:
             if solrPage['page_id'] not in graphPagesIdList:
                 self.solr.delete(q='doc_type:page AND user_id:' + user_id + ' AND page_id:' + solrPage['page_id'])

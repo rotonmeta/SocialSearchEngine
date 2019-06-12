@@ -10,6 +10,7 @@ class Category(models.Model):
     name = models.CharField(max_length=100)
     likes = models.IntegerField(default=0)
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
+    depth = models.IntegerField()
 
     def __str__(self):
         return self.name

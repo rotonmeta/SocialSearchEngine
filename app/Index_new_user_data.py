@@ -13,10 +13,9 @@ def index_data(user, solr, IndexManager):
         #     IndexManager.takeANDindexPages()
         #     IndexManager.takeANDindexPosts()
         #create_db_rows(solr, user)
-        remove_sparsity(user)
-        #calculate_similarity(solr, user)
+        #remove_sparsity(user)
+        calculate_similarity(solr, user)
 
-        #calculate_similarity(solr, user)
 
     except Exception as ex:
         print(ex)
