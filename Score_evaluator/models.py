@@ -8,7 +8,6 @@ from allauth.socialaccount.models import SocialAccount
 class Category(models.Model):
     id = models.CharField(max_length=40, primary_key=True)
     name = models.CharField(max_length=100)
-    likes = models.IntegerField(default=0)
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
     depth = models.IntegerField()
 
@@ -26,7 +25,6 @@ class CategoryScore(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     likes = models.IntegerField(default=0)
     real_value = models.BooleanField(default=False)
-    score = models.FloatField(default=0)
 
     def __str__(self):
         return str(self.user.user) + "'s score for " + str(self.category.name)

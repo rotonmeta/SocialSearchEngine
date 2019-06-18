@@ -51,7 +51,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                #'django.template.context_processors.i18n',
             ],
         },
     },
@@ -100,6 +99,19 @@ WSGI_APPLICATION = 'SocialSearchEngine.wsgi.application'
 
 # Database
 
+# if 'RDS_HOSTNAME' in os.environ:
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.mysql',
+#             'NAME': os.environ['RDS_DB_NAME'],
+#             'USER': os.environ['RDS_USERNAME'],
+#             'PASSWORD': os.environ['RDS_PASSWORD'],
+#             'HOST': os.environ['RDS_HOSTNAME'],
+#             'PORT': os.environ['RDS_PORT'],
+#             'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"}
+#         }
+#     }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -118,7 +130,8 @@ SOCIALACCOUNT_PROVIDERS = \
           'SCOPE': ['email',
                     'public_profile',
                     'user_likes',
-                    'user_posts'],
+                    'user_posts',
+                    'user_friends'],
           'AUTH_PARAMS': {'auth_type': 'reauthenticate'}, #added by rm
           'FIELDS': [
               'id',
@@ -142,7 +155,8 @@ SOCIALACCOUNT_PROVIDERS = \
 # SECURE_SSL_REDIRECT = True
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # SECURE_REDIRECT_EXEMPT = ['http://localhost:8000']
-LOGIN_REDIRECT_URL= ('/')
+
+LOGIN_REDIRECT_URL = ('/')
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
@@ -162,13 +176,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
-#REST_FRAMEWORK = {
-#    'DEFAULT_AUTHENTICATION_CLASSES': (
-#        'rest_framework.authentication.SessionAuthentication',
-#        'rest_framework.authentication.TokenAuthentication',
-#    )
-#}
 
 # Internationalization
 

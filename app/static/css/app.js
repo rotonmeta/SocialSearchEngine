@@ -475,15 +475,7 @@ function page_width(content) {
     var tags = $('<div class="tags"></div>');
     var icon = $('<a href="#" ><div class="icon" id="page" onClick="f(this);" style="background-color:black"><i class="fa fa-facebook" style="color:white"></i></div></a>');
 
-    if (content.genre != '__null__' &&
-        content.genre != null) {
-        var str_tag = content.genre;
-    } else {
-        //var tmp_str_tag = content.category_list[0].split(": ");
-        //var str_tag = tmp_str_tag[2].replace(/}/g,"").replace(/'/g,"");
-        var str_tag = '_da_aggiustare_'
-    }
-    var tag = $('<a href="#" onClick="propagation();" class="tag">' + str_tag + '</a>').css('margin-left', '4px');
+    var tag = $('<a href="#" onClick="propagation();" class="tag">' + content.category[0] + '</a>').css('margin-left', '4px');
     $(tags).append(icon);
     $(tags).append(tag);
     var text = $('<div class="text"></div>')
@@ -514,16 +506,8 @@ function page_height(content) {
     var text = $('<div class="in " onmouseover="imgBig(this)" ></div>').css('box-shadow', '0 2px 10px -0.5px #aaaaaa').css('height', '260px').css('margin-left', '20px');
     var tags = $('<div class="tags"></div>');
     var icon = $('<a href="#" ><div class="icon" id="page" onClick="f(this);" style="background-color:black"><i class="fa fa-facebook" style="color:white"></i></div></a>');
-    if (content.genre != '__null__' &&
-        content.genre != null) {
-        var str_tag = content.genre;
-    } else {
-        //var tmp_str_tag = content.category_list[0].split(": ")
-        // var str_tag = tmp_str_tag[2].replace(/}/g,"").replace(/'/g,"");
-        var str_tag = '_da_aggiustare_'
 
-    }
-    var tag = $('<a href="#" onClick="propagation();" class="tag">' + str_tag + '</a>').css('margin-left', '4px');
+    var tag = $('<a href="#" onClick="propagation();" class="tag">' + content.category[0] + '</a>').css('margin-left', '4px');
     $(tags).append(icon);
     $(tags).append(tag);
     var t = $('<div class="text  text-height"></div>');
@@ -556,15 +540,7 @@ function page_square(content) {
     var icon = $('<a href="#"  ><div class="icon" id="page" onClick="f(this);" style="background-color:white"><i class="fa fa-facebook" style="color:black"></i></div></a>');
     var title = $('<a href="#" ><div onclick="redirect(this,\'' + content.link + '\')" class="title title_white" >' + content.name + '</div></a>').css('padding-top', '4px').css('text-decoration', 'none').css('text-shadow',' 0 0 10px rgba(0,0,0,1)');
 
-    if (content.genre != '__null__' &&
-        content.genre != null) {
-        var str_tag = content.genre;
-    } else {
-        //var tmp_str_tag = content.category_list[0].split(": ");
-        //var str_tag = tmp_str_tag[2].replace(/}/g,"").replace(/'/g,"");
-        var str_tag = '_da_aggiustare_'
-    }
-    var tag = $('<a href="#" onClick="propagation();" class="tag">' + str_tag + '</a>').css('margin-left', '4px');
+    var tag = $('<a href="#" onClick="propagation();" class="tag">' + content.category[0] + '</a>').css('margin-left', '4px');
     $(tags).append(icon);
     $(tags).append(tag);
 

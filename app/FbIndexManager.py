@@ -5,47 +5,6 @@ from PIL import Image
 import requests
 
 
-def id_list_page(solr):
-    response = solr.search(q='doc_type:content AND type:facebook_page', rows=pow(10, 6), wt='python')
-    response2 = solr.search(q='doc_type:page', rows=pow(10, 6), wt='python')
-    pages_list = []
-    pages_link = []
-    for page in response:
-        link = str(page['link'])
-        if link not in pages_link:
-            pages_link.append(link)
-        else:
-            continue
-        string = ''
-        for page_user in response2:
-            if page['link'] == page_user['link']:
-                if str(page_user['user_id']) not in string:
-                    string = string + ' ' + str(page_user['user_id'])
-        doc = {}
-        for key in page.keys():
-            if str(key) == 'id' or 'version' in str(key):
-                continue
-            if str(key) == 'category_list':
-                l = []
-                for cat in page[key]:
-                    l.append(cat)
-                doc.update({str(key): l})
-                continue
-            try:
-                doc.update({str(key): str(page[key])})
-            except:
-                try:
-                    doc.update({str(key): page[key]})
-                except:
-                    doc.update({str(key): str(page[key])})
-
-        doc.update({'user_id': string})
-        pages_list.append(doc)
-    query = 'doc_type:content AND type:facebook_page'
-    solr.delete(q=query)
-    solr.add(pages_list)
-
-
 def web_description(doc):
     try:
         title, description, image = web_preview(doc['link'])
@@ -56,17 +15,23 @@ def web_description(doc):
         doc.update({'image': 'None'})
 
 
-def pageUpdater(_list, page, header):
+def page_updater(_list, page, header):
     for h in header:
         page.update(h)
+
     page.update({'page_id': page['id']})
     del page['id']
+
     page.update({'image': page['picture']['data']['url']})
     del page['picture']
-    catListToAdd = []
+
+    page.update({'category': page['category_list'][0]['name']})
+
+    cat_list_to_add = []
     for cat in page['category_list']:
-        catListToAdd.append(cat['id'])
-    page.update({'category_list': catListToAdd})
+        cat_list_to_add.append(cat['id'])
+    page.update({'category_list': cat_list_to_add})
+
     if 'about' in page.keys():
         page.update({'description': page['about']})
         del page['about']
@@ -74,12 +39,14 @@ def pageUpdater(_list, page, header):
         pass
     else:
         page.update({'description': '__null__'})
+
     _list.append(page)
+
     #print(page)
 
 
-def postUpdater(postsToAdd, post, headerList):
-    for h in headerList:
+def post_updater(posts_to_add, post, header_list):
+    for h in header_list:
         post.update(h)
 
     if 'message' in post.keys():
@@ -114,7 +81,7 @@ def postUpdater(postsToAdd, post, headerList):
         else:
             web_description(post)
 
-    postsToAdd.append(post)
+    posts_to_add.append(post)
     #print(post)
 
 
@@ -196,7 +163,7 @@ class FbIndexManager:
                 del post
                 continue
             else:
-                thread = threading.Thread(target=postUpdater, args=(postsToAdd, post, headerList))
+                thread = threading.Thread(target=post_updater, args=(postsToAdd, post, headerList))
                 thread.start()
                 threads.append(thread)
         for t in threads:
@@ -264,7 +231,7 @@ class FbIndexManager:
             if page['id'] in solrPagesIdList:
                 continue
             else:
-                thread = threading.Thread(target=pageUpdater, args=(pagesToAdd, page, headerList))
+                thread = threading.Thread(target=page_updater, args=(pagesToAdd, page, headerList))
                 thread.start()
                 threads.append(thread)
 
@@ -277,13 +244,30 @@ class FbIndexManager:
         print('PAGINE INDICIZZATE')
 
     def index_user(self):
-        result = self.solr.search(q='doc_type:user AND user_id:' + self.user.id)
-        if not result:
-            user_document = [{'doc_type': 'user',
-                              'user_id': self.user.id,
-                              'user_name': self.user.name}]
+        new_user = True
+        query = 'doc_type:user AND user_id:' + self.user.id
+        result = self.solr.search(q=query)
 
-            self.solr.add(user_document)
-            self.solr.commit()
-            return True
-        return False
+        if result:
+            self.solr.delete(q=query)
+            new_user = False
+
+        graph = self.user.graph
+        friend_data = graph.get_object(id='me', fields='friends.limit(5000){id}')
+
+        friends_id = []
+        for friend in friend_data['friends']['data']:
+            friends_id.append(friend['id'])
+
+        user_document = [{
+            'doc_type': 'user',
+            'user_id': self.user.id,
+            'user_name': self.user.name,
+            'friends_list': friends_id,
+            'friends_count': friend_data['friends']['summary']['total_count']
+        }]
+
+        self.solr.add(user_document)
+        self.solr.commit()
+
+        return new_user
