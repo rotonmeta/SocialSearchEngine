@@ -3,7 +3,6 @@ var count = 0;
 var filter = 'all';
 var grid = [];
 var slider_visibility = 0;
-var age_val = 0;
 var global_query = '';
 
 
@@ -161,27 +160,6 @@ function removezoom() {
 function redirect(e, link) {
     window.open(link);
     console.log($(e).closest('.grid-item').index());
-    // click_index = $(e).closest('.grid-item').index();
-    // $.ajax({
-    //
-    //     method: "GET",
-    //
-    //     url: "/",
-    //
-    //     data: {"query": global_query, "filter": filter, "click_index": click_index},
-    //
-    //     dataType: "text",
-    //
-    //     success: function (result) {
-    //
-    //         var data = JSON.parse(result);
-    //         console.log(result);
-    //
-    //     }
-    //
-    // });
-
-
 }
 
 function propagation() {
@@ -228,19 +206,13 @@ function photo_width(content) {
     var user_name = $('<div class="profpic"><a  href="' + content.user_profile_picture + '" target="_blank"><img onClick="propagation();" src="' + content.user_profile_picture + '"></img></a></div><a href="' + content.user_profile_picture + '" target="_blank" ><div  onClick="propagation();">' + content.user_name + '</div></a>').css('margin-left', '5px');
     $(user).append(user_name);
     var data_icon = $('<i class="fa fa-calendar-o" style="font-size:10px"></i>').css('margin-left', '10px');
-    var datastring = String(content.data).substring(0, 10);
+    var datastring = String(content.created_time).substring(0, 10);
     var data = $('<div>' + datastring + '</div>').css('margin-left', '5px');
 
 
     $(user).append(data_icon);
     $(user).append(data);
 
-    if (content.place_name != null && content.place_name != '__null__') {
-        var place_icon = $('<i class="material-icons" style="font-size:11px">place</i>').css('margin-left', '10px');
-        var place = $('<div>' + content.place_name + '</div>').css('margin-left', '5px');
-        $(user).append(place_icon);
-        $(user).append(place);
-    }
     $(inner_box).append(tags);
     $(inner_box).append(user);
 
@@ -475,7 +447,7 @@ function page_width(content) {
     var tags = $('<div class="tags"></div>');
     var icon = $('<a href="#" ><div class="icon" id="page" onClick="f(this);" style="background-color:black"><i class="fa fa-facebook" style="color:white"></i></div></a>');
 
-    var tag = $('<a href="#" onClick="propagation();" class="tag">' + content.category[0] + '</a>').css('margin-left', '4px');
+    var tag = $('<a href="#" onClick="propagation();" class="tag">' + content.category + '</a>').css('margin-left', '4px');
     $(tags).append(icon);
     $(tags).append(tag);
     var text = $('<div class="text"></div>')
@@ -507,7 +479,7 @@ function page_height(content) {
     var tags = $('<div class="tags"></div>');
     var icon = $('<a href="#" ><div class="icon" id="page" onClick="f(this);" style="background-color:black"><i class="fa fa-facebook" style="color:white"></i></div></a>');
 
-    var tag = $('<a href="#" onClick="propagation();" class="tag">' + content.category[0] + '</a>').css('margin-left', '4px');
+    var tag = $('<a href="#" onClick="propagation();" class="tag">' + content.category + '</a>').css('margin-left', '4px');
     $(tags).append(icon);
     $(tags).append(tag);
     var t = $('<div class="text  text-height"></div>');
@@ -540,7 +512,7 @@ function page_square(content) {
     var icon = $('<a href="#"  ><div class="icon" id="page" onClick="f(this);" style="background-color:white"><i class="fa fa-facebook" style="color:black"></i></div></a>');
     var title = $('<a href="#" ><div onclick="redirect(this,\'' + content.link + '\')" class="title title_white" >' + content.name + '</div></a>').css('padding-top', '4px').css('text-decoration', 'none').css('text-shadow',' 0 0 10px rgba(0,0,0,1)');
 
-    var tag = $('<a href="#" onClick="propagation();" class="tag">' + content.category[0] + '</a>').css('margin-left', '4px');
+    var tag = $('<a href="#" onClick="propagation();" class="tag">' + content.category + '</a>').css('margin-left', '4px');
     $(tags).append(icon);
     $(tags).append(tag);
 
@@ -600,111 +572,52 @@ function callAjax() {
     } else if (filter == 'all') {
         var query_filter = '';
     } else if (filter == 'photo') {
-        var query_filter = 'type:photo AND ';
+        var query_filter = 'AND type:photo';
     } else if (filter == 'video') {
-        var query_filter = '(type:video OR type:video_link) AND ';
+        var query_filter = 'AND (type:video OR type:video_link)';
     } else if (filter == 'page') {
-        var query_filter = '(type:page) AND ';
+        var query_filter = 'AND (type:page)';
     } else if (filter == 'link') {
-        var query_filter = '(type:link) AND ';
+        var query_filter = 'AND (type:link)';
     } else {
         return;
     }
+
     var query = searchStr.value;
-    if (query.includes(' ')==true){
-        query='"'+query+'"';
-    }else{
-        query=query;
+    if (query.includes(' ')==true) {
+        query = '"' + query + '"';
     }
     console.log(query);
     global_query=query;
-    var score_weight = " ";
-    var tmp_user_list = [];
-    var tmp_user_score = [];
-    for (i = 0; i < (score_list.length); i++) {
-        var score = parseFloat(score_list[i].score);
-        var weight = document.getElementById(String(score_list[i].type)).value;
-        score = score * parseFloat(weight);
-        if (tmp_user_list.indexOf(score_list[i].user_id) == -1) {
-            tmp_user_list.push(score_list[i].user_id);
-            tmp_user_score.push({
-                'user_id': score_list[i].user_id,
-                'score': score
-            });
-        } else {
-            for (j = 0; j < (tmp_user_score.length); j++) {
-                if (tmp_user_score[j].user_id == score_list[i].user_id) {
-                    if (score > tmp_user_score[j].score) {
-                        tmp_user_score[j].score = score;
-                        break;
-                    }
-                }
-            }
+    var score_weight = "";
+
+    if (score_list.length !== 0) {
+        for (i = 0; i < (score_list.length); i++) {
+            var score = score_list[i].score;
+            var other_user = score_list[i].users.find(user => user !== user_id);
+            score_weight = score_weight + " user_id:" + other_user + "^" + (10 + score * 10) + ' OR ';
         }
+
+        score_weight = ' AND (user_id:' + user_id + '^0.0000001 OR' + score_weight.substr(0, score_weight.length - 3) +')'
     }
-    for (i = 0; i < (tmp_user_score.length); i++) {
-        score_weight = score_weight + 'user_id:*' + tmp_user_score[i].user_id + '*^' + (tmp_user_score[i].score + 12) + ' OR ';
-    }
-    if (score_list.length == 0) {
-        score_weight = '';
-    } else {
-        score_weight = " and (user_id:*" + String(user_id) + "*^-10000 OR " + score_weight.substr(0, score_weight.length - 3) + ')^150 ';
-    }
-    console.log(score_weight);
-    xmlhttp.open("GET", solr
-        + 'select?q=doc_type:content AND '
-        + query_filter
-        + '(name:' + query + '^10 and place_name:' + query + '^9 and genre:' + query + '^8 and category_list:' + query + '^7 and description:' + query + '^6 and message:' + query + '^5 and city:' + query + '^4 and country:' + query + '^3)^0 '
-        + score_weight + ' &start=' + start + '&rows=13', true);
+
+    var entire_request =
+        'select?q=doc_type:content'
+        + query_filter + ' AND (name:'
+        + query + '^5 and category:'
+        + query + '^4 and description:'
+        + query + '^3 and message:'
+        + query + '^2 and location:'
+        + query + ')'
+        + score_weight + ' &start=' + start + '&rows=13';
+
+    console.log(entire_request);
+    xmlhttp.open("GET", solr + entire_request, true);
     xmlhttp.send();
+
+
 }
-function AjaxUpdateScore() {
-    var xmlhttp;
-    if (window.XMLHttpRequest) {
-        xmlhttp = new XMLHttpRequest();
-    } else {
-        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-    }
-    xmlhttp.onreadystatechange = function () {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            var docs = JSON.parse(xmlhttp.response).response.docs;
-            updateScore(docs, 0);
-        }
-    }
-    xmlhttp.open("GET", solr + 'select?q=doc_type:score -score:0 AND (userA:'+user_id+' OR userB:'+user_id+')& rows=130000', true);
-    xmlhttp.send();
-}
-function updateScore(arr){
-    var tmp_score_list=[];
-    for (i = 0; i < arr.length; i++) {
-        var doc={};
-        if (String(arr[i].userA)==user_id){
-                var second_user=arr[i].userB;
-        }else{
-                var second_user=arr[i].userA;
-        }
-        doc['user_id']=String(second_user);
-        doc['score']=arr[i].score;
-        if (String(arr[i].type).includes('places_')){
-                var type='place';
-        }else if (String(arr[i].type).includes('age_')){
-                var type='age';
-        }else if (String(arr[i].type).includes('books_')){
-                var type='book';
-        }else if (String(arr[i].type).includes('music_')){
-                var type='music';
-        }else if (String(arr[i].type).includes('television_')){
-                var type='TV';
-        }else if (String(arr[i].type).includes('movies_')){
-                var type='movie';
-        }else if (String(arr[i].type).includes('generic_')){
-                var type='page';
-        }
-        doc['type']=type;
-        tmp_score_list.push(doc);
-    }
-    score_list=tmp_score_list;
-}
+
 function render(arr, n) {
     removezoom();
     if (num_box == 0) {
@@ -773,11 +686,8 @@ function render(arr, n) {
             }
             count = count + 2;
             V.push(i);
-
-        } else if (arr[i].type == 'status') {
-            var box = post_square(arr[i]);
-            count = count + 1;
         }
+
         $(box).css({
             opacity: 0
         });
@@ -822,7 +732,7 @@ function render(arr, n) {
     }
     show_grid(num_elements, arr.length - correct);
     removezoom();
-    AjaxUpdateScore();
+    //AjaxUpdateScore();
 }
 
 

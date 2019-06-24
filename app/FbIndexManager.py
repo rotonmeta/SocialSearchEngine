@@ -5,14 +5,14 @@ from PIL import Image
 import requests
 
 
-def web_description(doc):
-    try:
-        title, description, image = web_preview(doc['link'])
-        doc.update({'description': description})
-        doc.update({'image': image})
-    except:
-        doc.update({'description': 'None'})
-        doc.update({'image': 'None'})
+# def web_description(doc):
+#     try:
+#         title, description, image = web_preview(doc['link'])
+#         doc.update({'description': description})
+#         doc.update({'image': image})
+#     except:
+#         doc.update({'description': 'None'})
+#         doc.update({'image': 'None'})
 
 
 def page_updater(_list, page, header):
@@ -40,6 +40,16 @@ def page_updater(_list, page, header):
     else:
         page.update({'description': '__null__'})
 
+    if 'location' in page.keys():
+        if 'city' in page['location'].keys():
+            location = page['location']['city']
+            if 'country' in page['location'].keys():
+                location = location + ' ' + page['location']['country']
+
+            page.update({'location': location})
+        else:
+            del page['location']
+
     _list.append(page)
 
     #print(page)
@@ -55,31 +65,33 @@ def post_updater(posts_to_add, post, header_list):
         post.update({'message': '__null__'})
 
     if post['type'] == 'video':
+        if 'full_picture' in post.keys() and 'description' in post.keys():
+            post.update({'image': post['full_picture']})
+        else:
+            #web_description(post)
+            return
 
         if 'source' in post.keys():
             if 'autoplay=1' in post['source']:
                 post.update({'type': 'video_link'})
                 del post['source']
 
-        if 'full_picture' in post.keys() and 'description' in post.keys():
-            post.update({'image': post['full_picture']})
-        else:
-            web_description(post)
-
     elif post['type'] == 'photo':
+
         if 'full_picture' in post.keys():
             post.update({'image': post['full_picture']})
             del post['full_picture']
             image_size(post)
         else:
-            pass
+            return
 
     elif post['type'] == 'link':
 
         if 'full_picture' in post.keys() and 'description' in post.keys():
             post.update({'image': post['full_picture']})
         else:
-            web_description(post)
+            #web_description(post)
+            return
 
     posts_to_add.append(post)
     #print(post)
@@ -93,8 +105,9 @@ def image_size(doc):
         doc.update({'width': img.width})
         doc.update({'height': img.height})
         doc.update({'aspect_ratio': float(img.width) / img.height})
+
     except:
-        doc.update({'width': 0}) #MODIFICATO da RM: era __null__ invece di 0, per tutte e 3
+        doc.update({'width': 0})
         doc.update({'height': 0})
         doc.update({'aspect_ratio': 0})
 

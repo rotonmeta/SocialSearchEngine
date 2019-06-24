@@ -1,9 +1,10 @@
-<!DOCTYPE html> {% load staticfiles %}{% load socialaccount %}{% providers_media_js %}
+<!DOCTYPE html> {% load static %}{% load socialaccount %}{% providers_media_js %}
 
 <html>
 
 <head>
     <title>Social Multimedia Search Engine</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'css/favicon.png' %}" />
     <script src="https://code.jquery.com/jquery-3.1.1.js"></script>
     <script src="https://unpkg.com/masonry-layout@4.2.2/dist/masonry.pkgd.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
@@ -19,25 +20,14 @@
             crossorigin="anonymous"></script>
 
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
-    <link rel="shortcut icon" href="{% static 'css/myicon.ico' %}" type="image/x-icon" />
 
     <script src="{% static 'css/app.js' %}"></script>
 
     <script>
         var solr = "{{solr}}";
-        var score_list = [];
         {% if profpic != 0 %}
             var user_id = "{{user_id}}";
-
-            score_list = [];
-            {% for document in score_list %}
-                var doc = {
-                    "user_id": "{{document.user_id}}",
-                    "type": "{{document.type}}",
-                    "score": "{{document.score}}",
-                };
-                score_list.push(doc);
-            {% endfor %}
+            var score_list = {{ score_list|safe }};
         {% endif %}
     </script>
 </head>

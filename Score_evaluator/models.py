@@ -31,7 +31,6 @@ class CategoryScore(models.Model):
 
     class Meta:
         managed = True
-        models.UniqueConstraint(fields=['user', 'category'], name="userCategory")
         db_table = "CategoryScore"
 
 

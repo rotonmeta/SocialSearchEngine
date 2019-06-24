@@ -11,9 +11,7 @@ solr = pysolr.Solr(solr_string)
 
 
 def results_list(request):
-    print(request.GET)
     logged = not request.user.is_anonymous
-
     if logged:
         token = SocialToken.objects.filter(account__user=request.user, account__provider='facebook').first()
 
@@ -28,12 +26,12 @@ def results_list(request):
         user = FbUser(token)
         user.initialize()
 
-        indexManager = FbIndexManager(user, solr)
-        thread = threading.Thread(target=index_data, args=(user, solr, indexManager))
+        index_manager = FbIndexManager(user, solr)
+        thread = threading.Thread(target=index_data, args=(user, solr, index_manager))
         thread.start()
 
-        #era un'altra funzione ma non c'è più, bisogna vedere cosa farne di questa variabile
-        score_list = []
+        score_list = solr.search(q='doc_type:score AND users:{}'.format(user.id),
+                                 sort='score desc', rows=200, wt='json').docs
 
         return render(request, 'app/results_list.html',
                       {'profpic': user.profPic, 'user_id': user.id, 'score_list': score_list, 'solr': solr_string})
