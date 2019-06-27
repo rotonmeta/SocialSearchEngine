@@ -593,12 +593,12 @@ function callAjax() {
 
     if (score_list.length !== 0) {
         for (i = 0; i < (score_list.length); i++) {
-            var score = score_list[i].score;
+            var score = score_list[i].similarity;
             var other_user = score_list[i].users.find(user => user !== user_id);
-            score_weight = score_weight + " user_id:" + other_user + "^" + (10 + score * 10) + ' OR ';
+            score_weight = score_weight + "user_id:" + other_user + "^" + (10 + score * 10) + ' OR ';
         }
 
-        score_weight = ' AND (user_id:' + user_id + '^0.0000001 OR' + score_weight.substr(0, score_weight.length - 3) +')'
+        score_weight = ' AND (user_id:' + user_id + '^0.000000000001 OR ' + score_weight.substr(0, score_weight.length - 4) +')'
     }
 
     var entire_request =

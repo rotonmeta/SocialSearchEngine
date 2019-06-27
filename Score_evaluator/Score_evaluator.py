@@ -68,6 +68,7 @@ def _similarity_helper(user1_id, user2_id, solr):
 def _similarity_helper_2(user1_id, user2_id, solr):
     query = 'doc_type:score AND users:({} AND {})'.format(user1_id, user2_id)
     solr.delete(q=query)
+    solr.commit()
 
     user1_vector, depth_vector = get_vector_tf_idf(user1_id)
     user2_vector, depth_vector = get_vector_tf_idf(user2_id)
@@ -81,7 +82,7 @@ def _similarity_helper_2(user1_id, user2_id, solr):
     new_score = [{
         'doc_type': 'score',
         'users': [user1_id, user2_id],
-        'score': result2,
+        'similarity': result2,
         'mutual_friends': mutual_friends
     }]
 

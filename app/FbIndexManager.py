@@ -56,6 +56,14 @@ def page_updater(_list, page, header):
 
 
 def post_updater(posts_to_add, post, header_list):
+    if post['privacy']['value'] == 'SELF':
+        return
+
+    del post['privacy']
+
+    if (post['type'] == 'status') or ('link' not in post.keys()):
+        return
+
     for h in header_list:
         post.update(h)
 
@@ -127,7 +135,7 @@ class FbIndexManager:
         profPic = str(self.user.profPic)
 
         getter = graph.get_object(id='me',
-                                    fields='posts.limit(1000){name,description,source,'
+                                    fields='posts.limit(1000){privacy,name,description,source,'
                                            'message,type,id,link,full_picture,created_time}')
 
         if 'posts' not in getter.keys():
@@ -171,9 +179,6 @@ class FbIndexManager:
         threads = []
         for post in graphPosts:
             if post['id'] in solrPostsIdList:
-                continue
-            elif (post['type'] == 'status') or ('link' not in post.keys()):
-                del post
                 continue
             else:
                 thread = threading.Thread(target=post_updater, args=(postsToAdd, post, headerList))
@@ -263,6 +268,7 @@ class FbIndexManager:
 
         if result:
             self.solr.delete(q=query)
+            self.solr.commit()
             new_user = False
 
         graph = self.user.graph

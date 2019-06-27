@@ -31,7 +31,7 @@ def results_list(request):
         thread.start()
 
         score_list = solr.search(q='doc_type:score AND users:{}'.format(user.id),
-                                 sort='score desc', rows=200, wt='json').docs
+                                 sort='similarity desc', rows=200, wt='json').docs
 
         return render(request, 'app/results_list.html',
                       {'profpic': user.profPic, 'user_id': user.id, 'score_list': score_list, 'solr': solr_string})

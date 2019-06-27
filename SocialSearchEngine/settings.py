@@ -21,11 +21,11 @@ ALLOWED_HOSTS = ['*']  #modificare quando debug = false
 #SECURE_CONTENT_TYPE_NOSNIFF = True
 #SECURE_BROWSER_XSS_FILTER = True
 
-# SECURE_SSL_REDIRECT = True
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-# os.environ['HTTPS'] = "on"
-# os.environ['wsgi.url_scheme'] = 'https'
-# ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+SECURE_SSL_REDIRECT = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+os.environ['HTTPS'] = "on"
+os.environ['wsgi.url_scheme'] = 'https'
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 
 # Application definition
 
@@ -86,32 +86,31 @@ ROOT_URLCONF = 'SocialSearchEngine.urls'
 
 WSGI_APPLICATION = 'SocialSearchEngine.wsgi.application'
 
-#Database
-
-# if 'RDS_HOSTNAME' in os.environ:
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.mysql',
-#             'NAME': os.environ['RDS_DB_NAME'],
-#             'USER': os.environ['RDS_USERNAME'],
-#             'PASSWORD': os.environ['RDS_PASSWORD'],
-#             'HOST': os.environ['RDS_HOSTNAME'],
-#             'PORT': os.environ['RDS_PORT'],
-#             'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"}
-#         }
-#     }
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ebdb',
-        'USER':'roton',
-        'PASSWORD': '18shtator',
-        'HOST': 'aa1njbwlpsbdg7p.cqnyuin38az6.us-west-2.rds.amazonaws.com',
-        'PORT': '3306',
-        'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"}
+if 'RDS_HOSTNAME' in os.environ:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.environ['RDS_DB_NAME'],
+            'USER': os.environ['RDS_USERNAME'],
+            'PASSWORD': os.environ['RDS_PASSWORD'],
+            'HOST': os.environ['RDS_HOSTNAME'],
+            'PORT': os.environ['RDS_PORT'],
+            'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"}
+        }
     }
-}
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'ebdb',
+#         'USER':'roton',
+#         'PASSWORD': '18shtator',
+#         'HOST': 'aa1njbwlpsbdg7p.cqnyuin38az6.us-west-2.rds.amazonaws.com',
+#         'PORT': '3306',
+#         'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"}
+#     }
+# }
+
 
 SOCIALACCOUNT_PROVIDERS = \
     {'facebook':
@@ -121,7 +120,7 @@ SOCIALACCOUNT_PROVIDERS = \
                     'user_likes',
                     'user_posts',
                     'user_friends'],
-          'AUTH_PARAMS': {'auth_type': 'reauthenticate'}, #added by rm
+          #'AUTH_PARAMS': {'auth_type': 'reauthenticate'}, #added by rm
           'FIELDS': [
               'id',
               'email',
@@ -140,6 +139,8 @@ SOCIALACCOUNT_PROVIDERS = \
           'VERSION': 'v3.3',
           }
      }
+
+ACCOUNT_EMAIL_VERIFICATION = "none"
 
 LOGIN_REDIRECT_URL = ('/')
 
