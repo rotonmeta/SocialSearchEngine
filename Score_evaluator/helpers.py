@@ -1,5 +1,10 @@
 import json
+import pysolr
+from app.FbUser import FbUser
 from .models import Category
+from allauth.socialaccount.models import SocialToken
+from .Score_evaluator import *
+import time
 
 
 def get_start_json():
@@ -28,4 +33,17 @@ def populate_db():
     recursive_parent(_json=_json, parent_id=None, _list=categories, depth=1)
 
     Category.objects.bulk_create(categories)
+
+
+def update_all_similarities():
+    tokens = SocialToken.objects.all()
+    solr = pysolr.Solr('https://solr.socialsearch.blog/solr/demo3/')
+
+    for elem in tokens:
+        user = FbUser(elem.token)
+        user.initialize()
+        print("aggiorno dati di " + user.name)
+        calculate_similarity(solr, user)
+        #time.sleep(5)
+
 

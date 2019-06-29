@@ -34,60 +34,72 @@
 
 <body>
 <main>
-<nav class="navbar fixed-top navbar-expand-lg  bg-light">
+    {% block navbar %}
 
-    <div class="login">
-        {% if profpic != 0 %}
-            <div class="nav-user">
-                <div class="profpic nav-profpic" style="margin-left: 5px;"><a
-                        href="#"><img
-                        src="{{ profpic }}"></a>
+    <nav class="navbar fixed-top navbar-expand-lg  bg-light">
+
+        <div class="login">
+            {% if profpic != 0 %}
+                <div class="nav-user">
+                    <div class="profpic nav-profpic" style="margin-left: 5px;"><a
+                            href="#"><img
+                            src="{{ profpic }}"></a>
+                    </div>
                 </div>
+            {% else %}
+                <div class="login-facebook">
+                    <a title="Facebook" class="socialaccount_provider facebook fb btn" href="{% provider_login_url "facebook" method="js_sdk" %}">
+                    <i class="fa fa-facebook fa-fw"></i> Login with Facebook
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        <input class="form-control mr-sm-2" type="text" placeholder="Search" id="query" style="width:65%" autocomplete="off">
+
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle dropdown-filters" type="button" id="dropdownMenuButton"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Filter by
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item all_filter" href="#" style="font-weight: bold">All</a>
+                <a class="dropdown-item photo_filter" href="#">Photo</a>
+                <a class="dropdown-item video_filter" href="#">Video</a>
+                <a class="dropdown-item link_filter" href="#">Link</a>
+                <a class="dropdown-item page_filter" href="#">Page</a>
             </div>
-        {% else %}
-            <div class="login-facebook">
-                <a title="Facebook" class="socialaccount_provider facebook fb btn" href="{% provider_login_url "facebook" method="js_sdk" %}">
-                <i class="fa fa-facebook fa-fw"></i> Login with Facebook
+        </div>
+
+        <div class="similarity">
+            <a class="btn btn-primary" href={% url 'similarity' %} >Similarity</a>
+        </div>
+
+        {% if profpic != 0 %}
+
+            <div class="logout" data-toggle="tooltip" title="Logout">
+                <a href={% url 'logout' %}?next=/>
+                    <i class="material-icons" style="font-size:45px">exit_to_app</i>
                 </a>
             </div>
         {% endif %}
-    </div>
-    <input class="form-control mr-sm-2" type="text" placeholder="Search" id="query" style="width:65%" autocomplete="off">
+    </nav>
 
-    <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle dropdown-filters" type="button" id="dropdownMenuButton"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width:90%">
-            Filter by
-        </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <a class="dropdown-item all_filter" href="#" style="font-weight: bold">All</a>
-            <a class="dropdown-item photo_filter" href="#">Photo</a>
-            <a class="dropdown-item video_filter" href="#">Video</a>
-            <a class="dropdown-item link_filter" href="#">Link</a>
-            <a class="dropdown-item page_filter" href="#">Page</a>
+    {% endblock %}
+
+    {% block content %}
+
+    <form onsubmit="return false;">
+        <div class="grid" data-masonry='{ "itemSelector": ".grid-item", "columnWidth": 1}'>
+        </div>
+    </form>
+
+    <div class="load" style="display:none;">
+        <div>
+            <button type="button" id="add" class="btn btn-primary btn-lg">LOAD MORE</button>
         </div>
     </div>
-    {% if profpic != 0 %}
 
-        <div class="logout" data-toggle="tooltip" title="Logout">
-            <a href={% url 'logout' %}?next=/>
-                <i class="material-icons" style="font-size:45px">exit_to_app</i>
-            </a>
-        </div>
-    {% endif %}
-</nav>
-
-<form onsubmit="return false;">
-
-    <div class="grid" data-masonry='{ "itemSelector": ".grid-item", "columnWidth": 1}'>
-
-    </div>
-</form>
-<div class="load" style="display:none;">
-    <div>
-        <button type="button" id="add" class="btn btn-primary btn-lg">LOAD MORE</button>
-    </div>
-</div>
+    {% endblock %}
 
 </main>
 

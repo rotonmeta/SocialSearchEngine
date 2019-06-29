@@ -282,6 +282,7 @@ class FbIndexManager:
             'doc_type': 'user',
             'user_id': self.user.id,
             'user_name': self.user.name,
+            'user_profile_picture': self.user.profPic,
             'friends_list': friends_id,
             'friends_count': friend_data['friends']['summary']['total_count']
         }]

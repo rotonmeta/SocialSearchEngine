@@ -4,9 +4,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'ys#(4)#yj=^lk0ai8(jr@+_#a(xr%eabn&+9y#t@=_8w40m5nz'
 
@@ -21,11 +18,11 @@ ALLOWED_HOSTS = ['*']  #modificare quando debug = false
 #SECURE_CONTENT_TYPE_NOSNIFF = True
 #SECURE_BROWSER_XSS_FILTER = True
 
-SECURE_SSL_REDIRECT = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-os.environ['HTTPS'] = "on"
-os.environ['wsgi.url_scheme'] = 'https'
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+# SECURE_SSL_REDIRECT = True
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# os.environ['HTTPS'] = "on"
+# os.environ['wsgi.url_scheme'] = 'https'
+# ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 
 # Application definition
 
@@ -86,30 +83,30 @@ ROOT_URLCONF = 'SocialSearchEngine.urls'
 
 WSGI_APPLICATION = 'SocialSearchEngine.wsgi.application'
 
-if 'RDS_HOSTNAME' in os.environ:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.environ['RDS_DB_NAME'],
-            'USER': os.environ['RDS_USERNAME'],
-            'PASSWORD': os.environ['RDS_PASSWORD'],
-            'HOST': os.environ['RDS_HOSTNAME'],
-            'PORT': os.environ['RDS_PORT'],
-            'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"}
-        }
-    }
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'ebdb',
-#         'USER':'roton',
-#         'PASSWORD': '18shtator',
-#         'HOST': 'aa1njbwlpsbdg7p.cqnyuin38az6.us-west-2.rds.amazonaws.com',
-#         'PORT': '3306',
-#         'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"}
+# if 'RDS_HOSTNAME' in os.environ:
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.mysql',
+#             'NAME': os.environ['RDS_DB_NAME'],
+#             'USER': os.environ['RDS_USERNAME'],
+#             'PASSWORD': os.environ['RDS_PASSWORD'],
+#             'HOST': os.environ['RDS_HOSTNAME'],
+#             'PORT': os.environ['RDS_PORT'],
+#             'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"}
+#         }
 #     }
-# }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'ebdb',
+        'USER':'roton',
+        'PASSWORD': '18shtator',
+        'HOST': 'aa1njbwlpsbdg7p.cqnyuin38az6.us-west-2.rds.amazonaws.com',
+        'PORT': '3306',
+        'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"}
+    }
+}
 
 
 SOCIALACCOUNT_PROVIDERS = \
@@ -146,7 +143,6 @@ LOGIN_REDIRECT_URL = ('/')
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
-#LOGIN_REDIRECT_URL = 'http://localhost:8000/'
 
 AUTH_PASSWORD_VALIDATORS = [
     {

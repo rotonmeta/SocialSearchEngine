@@ -604,10 +604,10 @@ function callAjax() {
     var entire_request =
         'select?q=doc_type:content'
         + query_filter + ' AND (name:'
-        + query + '^5 and category:'
-        + query + '^4 and description:'
-        + query + '^3 and message:'
-        + query + '^2 and location:'
+        + query + '^1.5 and category:'
+        + query + '^1.4 and description:'
+        + query + '^1.3 and message:'
+        + query + '^1.2 and location:'
         + query + ')'
         + score_weight + ' &start=' + start + '&rows=13';
 

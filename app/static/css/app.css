@@ -141,13 +141,13 @@ body {
     vertical-align: middle;
 }
 
-.dropdown {
+.dropdown, .similarity{
     height: 40px;
     width: 13%;
 }
 
-.dropdown .btn {
-    width: 100%;
+.dropdown .btn, .similarity .btn {
+    width: 90%;
 }
 
 .load {

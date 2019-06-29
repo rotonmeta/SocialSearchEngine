@@ -5,6 +5,7 @@ from allauth.socialaccount.models import SocialAccount
 from statsmodels.stats.weightstats import DescrStatsW
 from numpy import column_stack
 import math
+from django import db
 
 
 def create_db_rows(solr, user):
@@ -43,16 +44,20 @@ def _db_helper(object_list, user_likes, cat, user):
 def calculate_similarity(solr, user):
     user1_id = user.id
     users = solr.search(q='doc_type:user AND -user_id:' + user1_id, rows=200, wt='python')
+    user1_vector, not_useful = get_vector_tf_idf(user1_id)
 
     threads = []
     for user2 in users:
         print('Calculating similarity for ' + user2['user_name'])
-        thread = threading.Thread(target=_similarity_helper_2, args=(user1_id, user2['user_id'], solr))
+        thread = threading.Thread(target=_similarity_helper_2,
+                                  args=(user1_id, user2['user_id'], user1_vector, solr))
         thread.start()
         threads.append(thread)
 
     for t in threads:
         t.join()
+
+    db.connections.close_all()
 
 
 def _similarity_helper(user1_id, user2_id, solr):
@@ -65,12 +70,10 @@ def _similarity_helper(user1_id, user2_id, solr):
     print('Pearson similarity ' + str(result))
 
 
-def _similarity_helper_2(user1_id, user2_id, solr):
+def _similarity_helper_2(user1_id, user2_id, user1_vector, solr):
     query = 'doc_type:score AND users:({} AND {})'.format(user1_id, user2_id)
     solr.delete(q=query)
-    solr.commit()
 
-    user1_vector, depth_vector = get_vector_tf_idf(user1_id)
     user2_vector, depth_vector = get_vector_tf_idf(user2_id)
     data = column_stack((user1_vector, user2_vector))
 
@@ -83,7 +86,8 @@ def _similarity_helper_2(user1_id, user2_id, solr):
         'doc_type': 'score',
         'users': [user1_id, user2_id],
         'similarity': result2,
-        'mutual_friends': mutual_friends
+        'mutual_friends': mutual_friends,
+        'friends_count': len(mutual_friends)
     }]
 
     solr.add(new_score)
