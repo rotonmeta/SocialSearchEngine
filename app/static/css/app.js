@@ -13,6 +13,14 @@ $(function () {
         $('[data-toggle="tooltip"]').tooltip();
     });
 
+    $(function(){
+      if (location.pathname=="/similarity/"){
+        $("#query").attr("placeholder", "Top 10 similar users");
+        $("#query").prop("disabled", true);
+        $("#dropdownMenuButton").prop("disabled", true);
+      }
+    });
+
     $('.dropdown-menu a').eq(0).hide('fast');
 
     $(".dropdown-filters").click(function () {

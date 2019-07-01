@@ -1,6 +1,50 @@
 {% extends "app/results_list.html" %}
+{% load static %}
 
 {% block content %}
-  <h1>Local Library Home</h1>
-  <p>Welcome to LocalLibrary, a website developed by <em>Mozilla Developer Network</em>!</p>
+
+    <link rel="stylesheet" href="{% static 'css/similarity.css' %}">
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 col-md-4 mb-4">
+    		    <div class="card profile-card-3">
+    		        <div class="background-block">
+    		            <img src="http://lorempixel.com/650/940/nature/" alt="profile-background" class="background"/>
+    		        </div>
+    		        <div class="profile-thumb-block">
+    		            <img src="{{ profpic }}" alt="profile-image" class="profile"/>
+    		        </div>
+    		        <div class="card-content">
+                        <h2>{{ user_name }}</h2>
+                        <h3>Top categories:</h3>
+                        {% for cat in category_list %}
+                            <small>{{ cat }}</small>
+                        {% endfor %}
+                    </div>
+                </div>
+    		</div>
+            <div class="col-lg-4 col-md-4 mb-4">
+                <ul class="list-group">
+                    {% for user in user_list %}
+                        <li class="list-group-item list-group-item-action
+                            d-flex justify-content-between align-items-center py-2">
+                            <span class="badge badge-primary badge-pill">{{ forloop.counter }}</span>
+                            {{ user.user_name }}
+                            <div class="profpic nav-profpic">
+                                <img src="{{ user.user_profile_picture }}" class="img-fluid">
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block button %}
+    <div class="similarity">
+            <a id="btn-similarity" class="btn btn-primary" href={% url 'results_list' %}>Search</a>
+        </div>
 {% endblock %}

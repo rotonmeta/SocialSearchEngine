@@ -77,7 +77,7 @@ def _similarity_helper_2(user1_id, user2_id, user1_vector, solr):
     user2_vector, depth_vector = get_vector_tf_idf(user2_id)
     data = column_stack((user1_vector, user2_vector))
 
-    result = DescrStatsW(data).corrcoef[1][0]
+    # result = DescrStatsW(data).corrcoef[1][0]
     result2 = DescrStatsW(data, weights=depth_vector).corrcoef[1][0]
 
     mutual_friends = get_mutual_friends(user1_id, user2_id, solr)
@@ -93,7 +93,7 @@ def _similarity_helper_2(user1_id, user2_id, user1_vector, solr):
     solr.add(new_score)
     solr.commit()
 
-    print('Pearson similarity ' + str(user2_id) + ' ' + str(result))
+    # print('Pearson similarity ' + str(user2_id) + ' ' + str(result))
     print('DescrStatsW ' + str(user2_id) + ' ' + str(result2))
 
 

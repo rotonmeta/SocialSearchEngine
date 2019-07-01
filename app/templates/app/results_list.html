@@ -41,9 +41,10 @@
         <div class="login">
             {% if profpic != 0 %}
                 <div class="nav-user">
-                    <div class="profpic nav-profpic" style="margin-left: 5px;"><a
-                            href="#"><img
-                            src="{{ profpic }}"></a>
+                    <div class="profpic nav-profpic" style="margin-left: 5px;">
+                        <a href="#">
+                            <img src="{{ profpic }}">
+                        </a>
                     </div>
                 </div>
             {% else %}
@@ -54,7 +55,9 @@
                 </div>
             {% endif %}
         </div>
-        <input class="form-control mr-sm-2" type="text" placeholder="Search" id="query" style="width:65%" autocomplete="off">
+
+        <input class="form-control mr-sm-2" type="text" placeholder="Search" id="query"
+               style="width:65%" autocomplete="off">
 
         <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle dropdown-filters" type="button" id="dropdownMenuButton"
@@ -70,9 +73,12 @@
             </div>
         </div>
 
+
+        {% block button %}
         <div class="similarity">
-            <a class="btn btn-primary" href={% url 'similarity' %} >Similarity</a>
+            <a id="btn-similarity" class="btn btn-primary" href={% url 'similarity' %} >Similarity</a>
         </div>
+        {% endblock %}
 
         {% if profpic != 0 %}
 
@@ -104,7 +110,7 @@
 </main>
 
 <footer class="footer mt-auto py-3 fixed-bottom">
-  <div class="container text-center">
+  <div class="text-center">
     <span class="text-muted text-center">🔎 socialsearch.blog | Made by Roton Meta</span>
   </div>
 </footer>

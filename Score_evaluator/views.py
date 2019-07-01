@@ -1,5 +1,40 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from .models import CategoryScore
+import pysolr
+import threading
+
+solr = pysolr.Solr('https://solr.socialsearch.blog/solr/demo3/')
 
 
 def similarity(request):
-    return render(request, 'Score_evaluator/similarity.html')
+    if request.user.is_anonymous:
+        print('You have to login to view this page.')
+        return redirect('/')
+
+    context = request.session['context']
+    user_id = context['user_id']
+
+    # Getting top 5 liked categories for the user.
+    if 'category_list' not in context.keys():
+        top_categories = CategoryScore.objects.filter(user__uid=user_id)\
+            .values('category__name')\
+            .order_by('-likes')[:5]
+        category_list = [x['category__name'] for x in top_categories]
+        context.update({'category_list': category_list})
+
+    # Getting 10 most similar users to the current user.
+    if 'user_list' not in context.keys():
+        user_list = []
+        for score in context['score_list'][:10]:
+            user_id_ = score['users']
+            user_id_.remove(user_id)
+            details = solr.search(q='doc_type:user AND user_id:' + user_id_[0],
+                                  fl='user_name, user_profile_picture',
+                                  rows=1, wt='python').docs[0]
+            user_list.append(details)
+        context.update({'user_list': user_list})
+
+    request.session['context'] = context
+
+    return render(request, 'Score_evaluator/similarity.html', context)
+

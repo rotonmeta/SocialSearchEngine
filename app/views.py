@@ -11,16 +11,8 @@ solr = pysolr.Solr(solr_string)
 
 
 def results_list(request):
-    logged = not request.user.is_anonymous
-    if logged:
+    if not request.user.is_anonymous:
         token = SocialToken.objects.filter(account__user=request.user, account__provider='facebook').first()
-
-        # check if token is valid
-        url = 'https://graph.facebook.com/me?access_token=' + str(token)
-        r = requests.get(url)
-        if r.status_code == 400:
-            print('Token non valido.')
-            return render(request, 'app/results_list.html', {'profpic': 0, 'solr': solr_string})
 
         # inizializza i dati dell'utente loggato
         user = FbUser(token)
@@ -31,9 +23,16 @@ def results_list(request):
         thread.start()
 
         score_list = solr.search(q='doc_type:score AND users:{}'.format(user.id),
-                                 sort='similarity desc', rows=200, wt='json').docs
+                                 sort='similarity desc',
+                                 fl='users, similarity',
+                                 rows=200, wt='json').docs
 
-        return render(request, 'app/results_list.html',
-                      {'profpic': user.profPic, 'user_id': user.id, 'score_list': score_list, 'solr': solr_string})
+        # session variables to use in other view/template
+        context = {'profpic': user.profPic, 'user_id': user.id, 'user_name': user.name,
+                   'score_list': score_list, 'solr': solr_string}
+
+        request.session['context'] = context
+
+        return render(request, 'app/results_list.html', context)
 
     return render(request, 'app/results_list.html', {'profpic': 0, 'solr': solr_string})
