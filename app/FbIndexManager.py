@@ -1,18 +1,7 @@
 import threading
 import io
-from webpreview import *
 from PIL import Image
 import requests
-
-
-# def web_description(doc):
-#     try:
-#         title, description, image = web_preview(doc['link'])
-#         doc.update({'description': description})
-#         doc.update({'image': image})
-#     except:
-#         doc.update({'description': 'None'})
-#         doc.update({'image': 'None'})
 
 
 def page_updater(_list, page, header):
@@ -52,8 +41,6 @@ def page_updater(_list, page, header):
 
     _list.append(page)
 
-    #print(page)
-
 
 def post_updater(posts_to_add, post, header_list):
     if post['privacy']['value'] == 'SELF':
@@ -76,7 +63,6 @@ def post_updater(posts_to_add, post, header_list):
         if 'full_picture' in post.keys() and 'description' in post.keys():
             post.update({'image': post['full_picture']})
         else:
-            #web_description(post)
             return
 
         if 'source' in post.keys():
@@ -98,11 +84,9 @@ def post_updater(posts_to_add, post, header_list):
         if 'full_picture' in post.keys() and 'description' in post.keys():
             post.update({'image': post['full_picture']})
         else:
-            #web_description(post)
             return
 
     posts_to_add.append(post)
-    #print(post)
 
 
 def image_size(doc):
@@ -146,13 +130,10 @@ class FbIndexManager:
             if 'paging' in getter.keys() and 'next' in getter['paging'].keys():
                 getter = requests.get(getter['paging']['next']).json()
                 graphPosts.extend(getter['data'])
-                #print('if')
             elif 'posts' in getter.keys() and 'next' in getter['posts']['paging'].keys():
                 getter = requests.get(getter['posts']['paging']['next']).json()
                 graphPosts.extend(getter['data'])
-                #print('else')
             else:
-                #print('break')
                 break
 
         # 2) CREO UNA LISTA DI ELEMENTI DA AGGIUNGERE

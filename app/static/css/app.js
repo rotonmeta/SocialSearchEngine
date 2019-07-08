@@ -167,7 +167,7 @@ function removezoom() {
 
 function redirect(e, link) {
     window.open(link);
-    console.log($(e).closest('.grid-item').index());
+    //console.log($(e).closest('.grid-item').index());
 }
 
 function propagation() {
@@ -595,15 +595,17 @@ function callAjax() {
     if (query.includes(' ')==true) {
         query = '"' + query + '"';
     }
-    console.log(query);
+    //console.log(query);
     global_query=query;
     var score_weight = "";
+    var list_length = score_list.length;
+    var weight = list_length;
 
-    if (score_list.length !== 0) {
-        for (i = 0; i < (score_list.length); i++) {
+    if (list_length !== 0) {
+        for (i = 0; i < (list_length); i++) {
             var score = score_list[i].similarity;
             var other_user = score_list[i].users.find(user => user !== user_id);
-            score_weight = score_weight + "user_id:" + other_user + "^" + (10 + score * 10) + ' OR ';
+            score_weight = score_weight + "user_id:" + other_user + "^" + Math.pow(2, score * 10) + ' OR ';
         }
 
         score_weight = ' AND (user_id:' + user_id + '^0.000000000001 OR ' + score_weight.substr(0, score_weight.length - 4) +')'
@@ -619,7 +621,7 @@ function callAjax() {
         + query + ')'
         + score_weight + ' &start=' + start + '&rows=13';
 
-    console.log(entire_request);
+    //console.log(entire_request);
     xmlhttp.open("GET", solr + entire_request, true);
     xmlhttp.send();
 

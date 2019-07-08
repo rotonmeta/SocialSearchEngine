@@ -36,7 +36,7 @@ def test(v=1):
 
     average_ndcg = ndcg_sum / len(ndcg_values)
 
-    print(ndcg_values)
+    # print(ndcg_values)
     print('Average nDCG: ' + str(average_ndcg))
 
 
@@ -60,7 +60,7 @@ def nDCG(user, ndcg_values):
 
     ndcg = DCG(predicted_scores)/DCG(reference_scores)
 
-    #print('nDCG of ' + user['user_name'] + ': ' + str(ndcg))
+    print('nDCG of ' + user['user_name'] + ': ' + str(ndcg))
 
     ndcg_values.append({user['user_name']: ndcg})
 
@@ -83,7 +83,7 @@ def nDCG_friends(user, ndcg_values):
 
     ndcg = (DCG(predicted_scores) / DCG(reference_scores)) if DCG(reference_scores) != 0 else 0
 
-    #print('nDCG_friends of ' + user['user_name'] + ': ' + str(ndcg))
+    print('nDCG_friends of ' + user['user_name'] + ': ' + str(ndcg))
 
     ndcg_values.append({user['user_name']: ndcg})
 
@@ -96,7 +96,6 @@ def DCG(ranking, k=10):
         dcg = dcg + (_list[i]['ranking'] / math.log(i+2, 2))
 
     return dcg
-
 
 
 

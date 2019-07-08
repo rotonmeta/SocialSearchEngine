@@ -1,9 +1,8 @@
-from .FbIndexManager import *
 from Score_evaluator.Score_evaluator import *
 
 
 def index_data(user, solr, index_manager):
-    print('Indicizzando dati di: ', user.name)
+    print('Indexing data of ', user.name)
     try:
         is_new_user = index_manager.index_user()
         if is_new_user:
@@ -15,7 +14,7 @@ def index_data(user, solr, index_manager):
     except Exception as ex:
         print(ex)
         index_data(user, solr, index_manager)
-    print('finito!')
+    print('Indexing finished!')
     return
 
 

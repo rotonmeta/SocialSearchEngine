@@ -7,10 +7,11 @@
 
     <div class="container">
         <div class="row">
+            {% if profpic != 0 %}
             <div class="col-lg-4 col-md-4 mb-4">
     		    <div class="card profile-card-3">
     		        <div class="background-block">
-    		            <img src="http://lorempixel.com/650/940/nature/" alt="profile-background" class="background"/>
+    		            <img src="https://lorempixel.com/650/940/nature/" alt="profile-background" class="background"/>
     		        </div>
     		        <div class="profile-thumb-block">
     		            <img src="{{ profpic }}" alt="profile-image" class="profile"/>
@@ -24,6 +25,7 @@
                     </div>
                 </div>
     		</div>
+            {% endif %}
             <div class="col-lg-4 col-md-4 mb-4">
                 <ul class="list-group">
                     {% for user in user_list %}
@@ -45,6 +47,7 @@
 
 {% block button %}
     <div class="similarity">
-            <a id="btn-similarity" class="btn btn-primary" href={% url 'results_list' %}>Search</a>
+            <a id="btn-similarity" class="btn btn-primary" data-toggle="tooltip"
+               title="Go back to search interface"href={% url 'results_list' %}>Search</a>
         </div>
 {% endblock %}
